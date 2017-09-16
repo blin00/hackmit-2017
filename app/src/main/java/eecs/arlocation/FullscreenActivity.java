@@ -245,8 +245,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                         Log.d("AR", "" + s.getWidth() + "/" + s.getHeight() + " = " + area + "," + (double) s.getWidth() / s.getHeight());
                     }
                     Log.d("AR", "" + bestSize);
-                    mContentView.getLayoutParams().width = bestSize.getWidth();
-                    mContentView.getLayoutParams().height = bestSize.getHeight();
 
                     cameraManager.openCamera(id, new CameraDevice.StateCallback() {
                         @Override
@@ -257,7 +255,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                             final SurfaceHolder displaySurfaceHolder = mContentView.getHolder();
                             displaySurfaceHolder.addCallback(new SurfaceHolder.Callback() {
                                 @Override
-                                public void surfaceCreated(final SurfaceHolder holder) {
+                                public void surfaceCreated(SurfaceHolder holder) {
                                     Log.d("AR", "surface created");
                                     mDisplaySurface = holder.getSurface();
                                     startPreview();
@@ -266,7 +264,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                                 @Override
                                 public void surfaceChanged(SurfaceHolder holder, int format, int width, int height) {
                                     Log.d("AR", "surface changed");
-                                    mDisplaySurface = holder.getSurface();
                                 }
 
                                 @Override
@@ -299,24 +296,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     }
 
     private void startPreview() {
-        final CameraCaptureSession.CaptureCallback captureListener = new CameraCaptureSession.CaptureCallback() {
-            @Override
-            public void onCaptureCompleted(@NonNull CameraCaptureSession session, @NonNull CaptureRequest request, @NonNull TotalCaptureResult result) {
-//                Log.d("AR", "capture completed");
-            }
-
-            @Override
-            public void onCaptureFailed(@NonNull CameraCaptureSession session,
-                                        @NonNull CaptureRequest request, @NonNull CaptureFailure failure) {
-                Log.d("AR", "capture failed");
-            }
-
-            @Override
-            public void onCaptureStarted(@NonNull CameraCaptureSession session,
-                                         @NonNull CaptureRequest request, long timestamp, long frameNumber) {
-//                Log.d("AR", "capture started");
-            }
-        };
         try {
             final CaptureRequest.Builder captureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
@@ -329,7 +308,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     try {
                         Log.d("AR", "configured completed");
                         previewCaptureSession = session;
-                        session.setRepeatingRequest(captureRequestBuilder.build(), captureListener, null);
+                        session.setRepeatingRequest(captureRequestBuilder.build(), null, null);
                     } catch (CameraAccessException cae) {
                         throw new RuntimeException("Capture failed");
                     }
