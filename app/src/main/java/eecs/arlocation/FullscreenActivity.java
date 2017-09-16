@@ -90,90 +90,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
-    private final Runnable mHidePart2Runnable = new Runnable() {
-        @SuppressLint("InlinedApi")
-        @Override
-        public void run() {
-            // Delayed removal of status and navigation bar
 
-            // Note that some of these constants are new as of API 16 (Jelly Bean)
-            // and API 19 (KitKat). It is safe to use them, as they are inlined
-            // at compile-time and do nothing on earlier devices.
-            mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                    | View.SYSTEM_UI_FLAG_FULLSCREEN
-                    | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                    | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                    | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                    | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
-            final Handler h = new Handler(Looper.getMainLooper());
-            final Runnable r = new Runnable() {
-                public void run() {
-                    Location destination = new Location("destination"); //replace
-                    Location source = new Location("source"); //replace
-                    source.setLongitude(-71.096);
-                    source.setLatitude(42.3586);
-                    destination.setLongitude(-71.0966);
-                    destination.setLatitude(42.3587);
-                    float mybear = (float) azimuth;
-                    float desirebear = source.bearingTo(destination);
-                    float diff = mybear - desirebear;
-                    View left = findViewById(R.id.left);
-                    View right = findViewById(R.id.right);
-                    Log.d("direction", String.valueOf(azimuth));
-                    //right.setVisibility(View.INVISIBLE);
-                    Log.d("diff" , String.valueOf(diff));
-                    if (diff < 0){
-                        right.setVisibility(View.VISIBLE);
-                        left.setVisibility(View.INVISIBLE);
-                    }
-                    else{
-                        left.setVisibility(View.VISIBLE);
-                        right.setVisibility(View.INVISIBLE);
-                    }
-
-                    h.postDelayed(this, 300);
-
-                }
-
-            };
-            h.post(r);
-        }
-    };
-    private View mControlsView;
-    private final Runnable mShowPart2Runnable = new Runnable() {
-        @Override
-        public void run() {
-            // Delayed display of UI elements
-            ActionBar actionBar = getSupportActionBar();
-            if (actionBar != null) {
-                actionBar.show();
-            }
-            mControlsView.setVisibility(View.VISIBLE);
-        }
-    };
-    private boolean mVisible;
-    private final Runnable mHideRunnable = new Runnable() {
-        @Override
-        public void run() {
-            hide();
-        }
-    };
-    /**
-     * Touch listener to use for in-layout UI controls to delay hiding the
-     * system UI. This is to prevent the jarring behavior of controls going away
-     * while interacting with activity UI.
-     */
-
-    private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
-        @Override
-        public boolean onTouch(View view, MotionEvent motionEvent) {
-            if (AUTO_HIDE) {
-                delayedHide(AUTO_HIDE_DELAY_MILLIS);
-            }
-            return false;
-        }
-    };
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -183,28 +101,59 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
-        mVisible = true;
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = (SurfaceView) findViewById(R.id.fullscreen_content);
 
 
-        // Set up the user interaction to manually show or hide the system UI.
-        mContentView.setOnClickListener(new View.OnClickListener() {
-            @Override
-            public void onClick(View view) {
-                toggle();
-            }
-        });
+        ActionBar actionBar = getSupportActionBar();
+        if (actionBar != null) {
+            actionBar.hide();
+        }
 
-        // Upon interacting with UI controls, delay any scheduled hide()
-        // operations to prevent the jarring behavior of controls going away
-        // while interacting with the UI.
-//        findViewById(R.id.dummy_button).setOnTouchListener(mDelayHideTouchListener);
+        mContentView = (SurfaceView) findViewById(R.id.fullscreen_content);
+
+        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
         mCameraHandlerThread = new HandlerThread("CameraThread");
         mCameraHandlerThread.start();
         mCameraHandler = new Handler(mCameraHandlerThread.getLooper());
 
+
+        final Handler h = new Handler(Looper.getMainLooper());
+        final Runnable r = new Runnable() {
+            public void run() {
+                Location destination = new Location("destination"); //replace
+                Location source = new Location("source"); //replace
+                source.setLongitude(-71.096);
+                source.setLatitude(42.3586);
+                destination.setLongitude(-71.0966);
+                destination.setLatitude(42.3587);
+                float mybear = (float) azimuth;
+                float desirebear = source.bearingTo(destination);
+                float diff = mybear - desirebear;
+                View left = findViewById(R.id.left);
+                View right = findViewById(R.id.right);
+                Log.d("direction", String.valueOf(azimuth));
+                //right.setVisibility(View.INVISIBLE);
+                Log.d("diff", String.valueOf(diff));
+                if (diff < 0) {
+                    right.setVisibility(View.VISIBLE);
+                    left.setVisibility(View.INVISIBLE);
+                } else {
+                    left.setVisibility(View.VISIBLE);
+                    right.setVisibility(View.INVISIBLE);
+                }
+
+                h.postDelayed(this, 300);
+
+            }
+
+        };
+        h.post(r);
         setupCamera();
     }
 
@@ -412,59 +361,4 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
             }
         }
     }
-
-    @Override
-    protected void onPostCreate(Bundle savedInstanceState) {
-        super.onPostCreate(savedInstanceState);
-
-        // Trigger the initial hide() shortly after the activity has been
-        // created, to briefly hint to the user that UI controls
-        // are available.
-        delayedHide(100);
-    }
-
-    private void toggle() {
-        if (mVisible) {
-            hide();
-        } else {
-            show();
-        }
-    }
-
-    private void hide() {
-        // Hide UI first
-        ActionBar actionBar = getSupportActionBar();
-        if (actionBar != null) {
-            actionBar.hide();
-        }
-        mControlsView.setVisibility(View.GONE);
-        mVisible = false;
-
-        // Schedule a runnable to remove the status and navigation bar after a delay
-        mHideHandler.removeCallbacks(mShowPart2Runnable);
-        mHideHandler.postDelayed(mHidePart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    @SuppressLint("InlinedApi")
-    private void show() {
-        // Show the system bar
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LAYOUT_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION);
-        mVisible = true;
-
-        // Schedule a runnable to display UI elements after a delay
-        mHideHandler.removeCallbacks(mHidePart2Runnable);
-        mHideHandler.postDelayed(mShowPart2Runnable, UI_ANIMATION_DELAY);
-    }
-
-    /**
-     * Schedules a call to hide() in [delay] milliseconds, canceling any
-     * previously scheduled calls.
-     */
-    private void delayedHide(int delayMillis) {
-        mHideHandler.removeCallbacks(mHideRunnable);
-        mHideHandler.postDelayed(mHideRunnable, delayMillis);
-    }
-
-
 }
