@@ -1,10 +1,15 @@
 package eecs.arlocation;
 
 import android.annotation.SuppressLint;
+import android.location.Location;
+import android.media.Image;
+import android.os.HandlerThread;
+import android.os.Looper;
 import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
 import android.os.Handler;
+import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
 
@@ -47,6 +52,23 @@ public class FullscreenActivity extends AppCompatActivity {
                     | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
                     | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
                     | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
+
+            final Handler h = new Handler(Looper.getMainLooper());
+            final Runnable r = new Runnable() {
+                public void run() {
+                    Location destination = new Location("destination"); //replace
+                    Location source = new Location("source"); //replace
+
+
+                    View left = findViewById(R.id.left);
+                    View right = findViewById(R.id.right);
+                    right.setVisibility(View.INVISIBLE);
+                    h.postDelayed(this, 300);
+
+                }
+
+            };
+            h.post(r);
         }
     };
     private View mControlsView;
@@ -73,6 +95,7 @@ public class FullscreenActivity extends AppCompatActivity {
      * system UI. This is to prevent the jarring behavior of controls going away
      * while interacting with activity UI.
      */
+
     private final View.OnTouchListener mDelayHideTouchListener = new View.OnTouchListener() {
         @Override
         public boolean onTouch(View view, MotionEvent motionEvent) {
@@ -160,4 +183,6 @@ public class FullscreenActivity extends AppCompatActivity {
         mHideHandler.removeCallbacks(mHideRunnable);
         mHideHandler.postDelayed(mHideRunnable, delayMillis);
     }
+
+
 }
