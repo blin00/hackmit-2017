@@ -72,6 +72,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     private Surface mDisplaySurface;
     private HandlerThread mCameraHandlerThread;
     private Handler mCameraHandler;
+    private Size bestSize;
     private CameraCaptureSession previewCaptureSession;
     // arbitrary constants for permissions request
     private static final int MY_PERMISSIONS_REQUEST_READ_CAMERA = 0;
@@ -233,9 +234,20 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     Log.d("AR", "using back-facing camera with id " + id);
                     StreamConfigurationMap configs = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP);
                     Size[] sizes = configs.getOutputSizes(SurfaceTexture.class);
-                    for (Size s : sizes) {
-                        Log.d("AR", "" + s.getWidth() + "/" + s.getHeight() + " = " + (double) s.getWidth() / s.getHeight());
+                    int maxArea = -1;
+                    for (int i = 0; i < sizes.length; i++) {
+                        Size s = sizes[i];
+                        int area = s.getWidth() * s.getHeight();
+                        if (area > maxArea) {
+                            maxArea = area;
+                            bestSize = s;
+                        }
+                        Log.d("AR", "" + s.getWidth() + "/" + s.getHeight() + " = " + area + "," + (double) s.getWidth() / s.getHeight());
                     }
+                    Log.d("AR", "" + bestSize);
+                    mContentView.getLayoutParams().width = bestSize.getWidth();
+                    mContentView.getLayoutParams().height = bestSize.getHeight();
+
                     cameraManager.openCamera(id, new CameraDevice.StateCallback() {
                         @Override
                         public void onOpened(@NonNull CameraDevice camera) {
