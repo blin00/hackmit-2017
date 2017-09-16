@@ -2,6 +2,10 @@ package eecs.arlocation;
 
 import android.Manifest;
 import android.annotation.SuppressLint;
+import android.hardware.Sensor;
+import android.hardware.SensorEvent;
+import android.hardware.SensorEventListener;
+import android.hardware.SensorManager;
 import android.location.Location;
 import android.media.Image;
 import android.os.HandlerThread;
@@ -44,7 +48,7 @@ import static android.hardware.camera2.CameraMetadata.LENS_FACING_BACK;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class FullscreenActivity extends AppCompatActivity {
+public class FullscreenActivity extends AppCompatActivity implements SensorEventListener{
     /**
      * Whether or not the system UI should be auto-hidden after
      * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
@@ -71,6 +75,21 @@ public class FullscreenActivity extends AppCompatActivity {
     private CameraCaptureSession previewCaptureSession;
     // arbitrary constants for permissions request
     private static final int MY_PERMISSIONS_REQUEST_READ_CAMERA = 0;
+    public static float swRoll;
+    public static float swPitch;
+    public static float swAzimuth;
+    public static double azimuth;
+
+    public static SensorManager mSensorManager;
+    public static Sensor accelerometer;
+    public static Sensor magnetometer;
+
+    public static float[] mAccelerometer = null;
+    public static float[] mGeomagnetic = null;
+
+
+    public void onAccuracyChanged(Sensor sensor, int accuracy) {
+    }
     private final Runnable mHidePart2Runnable = new Runnable() {
         @SuppressLint("InlinedApi")
         @Override
@@ -92,10 +111,15 @@ public class FullscreenActivity extends AppCompatActivity {
                 public void run() {
                     Location destination = new Location("destination"); //replace
                     Location source = new Location("source"); //replace
+                    source.setLongitude(-71.096);
+                    source.setLatitude(42.3586);
+                    destination.setLongitude(-71.0966);
+                    destination.setLatitude(42.3587);
 
-
+                    float desirebear = source.bearingTo(destination);
                     View left = findViewById(R.id.left);
                     View right = findViewById(R.id.right);
+                    Log.d("direction", String.valueOf(azimuth));
                     right.setVisibility(View.INVISIBLE);
                     h.postDelayed(this, 300);
 
@@ -145,7 +169,9 @@ public class FullscreenActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         setContentView(R.layout.activity_fullscreen);
-
+        mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
+        accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
+        magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         mVisible = true;
         mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = (SurfaceView) findViewById(R.id.fullscreen_content);
@@ -181,6 +207,21 @@ public class FullscreenActivity extends AppCompatActivity {
         }
     }
 
+    @Override
+    protected void onResume() {
+        super.onResume();
+
+        mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
+        mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_GAME);
+    }
+
+    @Override
+    protected void onPause() {
+        super.onPause();
+        mSensorManager.unregisterListener(this, accelerometer);
+        mSensorManager.unregisterListener(this, magnetometer);
+    }
+
     private void setupCamera() {
         if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
                 != PackageManager.PERMISSION_GRANTED) {
@@ -191,6 +232,33 @@ public class FullscreenActivity extends AppCompatActivity {
         } else {
             Log.d("AR", "already have camera perms");
             finishSetupCamera();
+        }
+    }
+
+    @Override
+    public void onSensorChanged(SensorEvent event) {
+        // onSensorChanged gets called for each sensor so we have to remember the values
+        if (event.sensor.getType() == Sensor.TYPE_ACCELEROMETER) {
+            mAccelerometer = event.values;
+        }
+
+        if (event.sensor.getType() == Sensor.TYPE_MAGNETIC_FIELD) {
+            mGeomagnetic = event.values;
+        }
+
+        if (mAccelerometer != null && mGeomagnetic != null) {
+            float R[] = new float[9];
+            float I[] = new float[9];
+            boolean success = SensorManager.getRotationMatrix(R, I, mAccelerometer, mGeomagnetic);
+
+            if (success) {
+                float orientation[] = new float[3];
+                SensorManager.getOrientation(R, orientation);
+                // at this point, orientation contains the azimuth(direction), pitch and roll values.
+                azimuth = 180 * orientation[0] / Math.PI;
+                double pitch = 180 * orientation[1] / Math.PI;
+                double roll = 180 * orientation[2] / Math.PI;
+            }
         }
     }
 
