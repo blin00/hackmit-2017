@@ -115,12 +115,23 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     source.setLatitude(42.3586);
                     destination.setLongitude(-71.0966);
                     destination.setLatitude(42.3587);
-
+                    float mybear = (float) azimuth;
                     float desirebear = source.bearingTo(destination);
+                    float diff = mybear - desirebear;
                     View left = findViewById(R.id.left);
                     View right = findViewById(R.id.right);
                     Log.d("direction", String.valueOf(azimuth));
-                    right.setVisibility(View.INVISIBLE);
+                    //right.setVisibility(View.INVISIBLE);
+                    Log.d("diff" , String.valueOf(diff));
+                    if (diff < 0){
+                        right.setVisibility(View.VISIBLE);
+                        left.setVisibility(View.INVISIBLE);
+                    }
+                    else{
+                        left.setVisibility(View.VISIBLE);
+                        right.setVisibility(View.INVISIBLE);
+                    }
+
                     h.postDelayed(this, 300);
 
                 }
