@@ -46,7 +46,6 @@ import static android.hardware.camera2.CameraMetadata.LENS_FACING_BACK;
  */
 public class FullscreenActivity extends AppCompatActivity {
     private SurfaceView mContentView;
-    private View mControlsView;
     private CameraDevice mCameraDevice;
     private Surface mDisplaySurface;
     private HandlerThread mCameraHandlerThread;
@@ -83,7 +82,6 @@ public class FullscreenActivity extends AppCompatActivity {
             actionBar.hide();
         }
 
-        mControlsView = findViewById(R.id.fullscreen_content_controls);
         mContentView = (SurfaceView) findViewById(R.id.fullscreen_content);
 
         mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
