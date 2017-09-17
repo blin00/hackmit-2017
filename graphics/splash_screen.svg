@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg width="563px" height="800px" viewBox="0 0 563 800" version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink">
+    <!-- Generator: Sketch 41.2 (35397) - http://www.bohemiancoding.com/sketch -->
+    <title>mobile copy 9</title>
+    <desc>Created with Sketch.</desc>
+    <defs>
+        <linearGradient x1="-1.11022302e-14%" y1="50%" x2="90.399478%" y2="50%" id="linearGradient-1">
+            <stop stop-color="#FFFFFF" stop-opacity="0.139719203" offset="0%"></stop>
+            <stop stop-color="#FFFFFF" stop-opacity="0" offset="100%"></stop>
+        </linearGradient>
+        <rect id="path-2" x="0" y="0" width="563" height="800"></rect>
+        <mask id="mask-3" maskContentUnits="userSpaceOnUse" maskUnits="objectBoundingBox" x="0" y="0" width="563" height="800" fill="white">
+            <use xlink:href="#path-2"></use>
+        </mask>
+    </defs>
+    <g id="Welcome" stroke="none" stroke-width="1" fill="none" fill-rule="evenodd">
+        <g id="mobile-copy-9">
+            <polygon id="Triangle-3-Copy-8" fill="url(#linearGradient-1)" transform="translate(4.494975, 625.719945) rotate(-115.000000) translate(-4.494975, -625.719945) " points="102.494975 625.719945 -93.5050253 630.219945 -93.5050253 621.219945"></polygon>
+            <use id="Rectangle-3" stroke="#979797" mask="url(#mask-3)" stroke-width="2" fill="#85C6C4" xlink:href="#path-2"></use>
+            <g id="Group-2" transform="translate(233.000000, 300.000000)">
+                <g id="Group-3">
+                    <g id="Group" fill="#FFFFFF">
+                        <ellipse id="Oval" cx="49" cy="45.6208482" rx="49" ry="45.6208482"></ellipse>
+                        <path d="M7.056,68.9381707 L44.8539769,120.387557 C47.1389761,123.497824 50.8562378,123.504339 53.1460231,120.387557 L90.944,68.9381707 L7.056,68.9381707 Z" id="Combined-Shape"></path>
+                        <path d="M89.8503675,70.8237505 C81.0742344,83.1296346 66.0546236,91.2416965 49,91.2416965 C31.9453764,91.2416965 16.9257656,83.1296346 8.14963247,70.8237505 L3.92188263,63.5345013 C2.92466025,61.3620614 2.1033056,59.1029236 1.47448648,56.7726111 L96.5255135,56.7726111 C95.8966944,59.1029236 95.0753397,61.3620614 94.0781113,63.5345117 L89.8503675,70.8237505 Z" id="Combined-Shape"></path>
+                    </g>
+                    <ellipse id="Oval-2" fill="#85C5C4" cx="49.5" cy="48.5" rx="17.5" ry="17.5"></ellipse>
+                </g>
+            </g>
+            <text id="where-u-at" font-family="AvenirNext-Medium, Avenir Next" font-size="40" font-weight="400" fill="#FFFFFF">
+                <tspan x="185.14" y="487">where u at</tspan>
+            </text>
+            <text id="made-for-hackmit-by" font-family="AvenirNext-Medium, Avenir Next" font-size="20" font-weight="400" fill="#FFFFFF">
+                <tspan x="115.12" y="764">made for hackmit by ac, bl, jl, and zy</tspan>
+            </text>
+        </g>
+    </g>
+</svg>
