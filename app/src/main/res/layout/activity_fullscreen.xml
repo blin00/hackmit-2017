@@ -58,7 +58,7 @@
         android:id="@+id/alex_target"
         android:layout_width="44dp"
         android:layout_height="85dp"
-        app:srcCompat="@drawable/plumbob" />
+        app:srcCompat="@drawable/alex_plumbob" />
 
 
     <ImageView
@@ -72,9 +72,14 @@
         android:id="@+id/zhongxia_target"
         android:layout_width="44dp"
         android:layout_height="85dp"
-        app:srcCompat="@drawable/plumbob" />
+        app:srcCompat="@drawable/zhongxia_plumbob" />
 
+    <ImageView
 
+        android:id="@+id/jenny_target"
+        android:layout_width="44dp"
+        android:layout_height="85dp"
+        app:srcCompat="@drawable/jenny_plumbob" />
 
 
     <LinearLayout
@@ -82,7 +87,6 @@
         android:layout_height="match_parent"
         android:layout_gravity="center|bottom"
         android:orientation="horizontal">
-
 
 
             <TextView
