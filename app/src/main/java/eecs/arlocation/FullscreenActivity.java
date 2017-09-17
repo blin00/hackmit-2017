@@ -46,25 +46,7 @@ import static android.hardware.camera2.CameraMetadata.LENS_FACING_BACK;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class FullscreenActivity extends AppCompatActivity implements SensorEventListener{
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
-
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
+public class FullscreenActivity extends AppCompatActivity implements SensorEventListener {
     private SurfaceView mContentView;
     private CameraDevice mCameraDevice;
     private Surface mDisplaySurface;
@@ -82,18 +64,15 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     // hardcode temp value to be overridden later
     private float horizontalAngle = 60;
 
-    public static float swRoll;
-    public static float swPitch;
-    public static float swAzimuth;
-    public static double azimuth;
-    public static Location myLocation;
+    private double azimuth;
+    private Location myLocation;
 
-    public static SensorManager mSensorManager;
-    public static Sensor accelerometer;
-    public static Sensor magnetometer;
+    private SensorManager mSensorManager;
+    private Sensor accelerometer;
+    private Sensor magnetometer;
 
-    public static float[] mAccelerometer = null;
-    public static float[] mGeomagnetic = null;
+    private float[] mAccelerometer = null;
+    private float[] mGeomagnetic = null;
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
@@ -126,7 +105,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
             public void run() {
                 Location destination = new Location("destination"); //replace
                 Location source = myLocation;
-                //Util.makeToast(FullscreenActivity.this, source.toString());
+                source.setLatitude(42.356);
+                source.setLongitude(-71.102);
                 destination.setLongitude(-71.1019655);
                 destination.setLatitude(42.3545758);
                 float distance = source.distanceTo(destination);
