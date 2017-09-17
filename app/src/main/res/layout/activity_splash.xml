@@ -5,9 +5,10 @@
     android:orientation="vertical">
 
     <ImageView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:src = "@drawable/splash_screen"/>
+        android:layout_width="468dp"
+        android:layout_height="609dp"
+        android:src = "@drawable/splash_screen"
+        android:layout_gravity="center"/>
 
 
 </LinearLayout>
