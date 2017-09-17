@@ -79,7 +79,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
 
     private CameraCaptureSession previewCaptureSession;
 
-    private float horizontalAngle;
+    // hardcode temp value to be overridden later
+    private float horizontalAngle = 60;
 
     public static float swRoll;
     public static float swPitch;
@@ -133,6 +134,18 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 float mybear = (float) azimuth;
                 float desirebear = source.bearingTo(destination);
                 float diff = mybear - desirebear;
+                int width = mContentView.getWidth();
+                int height = mContentView.getHeight();
+                double x = distance * Math.sin(diff * Math.PI / 180);
+                double y = distance * Math.cos(diff * Math.PI / 180);
+                double z = y * Math.tan(horizontalAngle / 2);
+                int offset = (int) (x / z * width / 2);
+                View target = findViewById(R.id.target);
+                if (diff < horizontalAngle / 2 || diff > -horizontalAngle / 2) {
+                    target.animate().x(width / 2 + offset).y(10).setDuration(0).start();
+                } else {
+                    target.setVisibility(View.GONE);
+                }
                 ImageView left = (ImageView) findViewById(R.id.left);
                 ImageView right = (ImageView) findViewById(R.id.right);
                 final TextView helloTextView = (TextView) findViewById(R.id.name_id);
