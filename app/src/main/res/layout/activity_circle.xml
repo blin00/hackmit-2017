@@ -6,4 +6,13 @@
     android:layout_height="match_parent"
     tools:context="eecs.arlocation.CircleActivity">
 
+
+    <ImageView
+        android:layout_width="344dp"
+        android:layout_height="551dp"
+        android:src = "@drawable/circles_background"
+        android:layout_gravity="center"/>
+
+
+
 </android.support.constraint.ConstraintLayout>
