@@ -74,29 +74,43 @@
         android:layout_height="85dp"
         app:srcCompat="@drawable/zhongxia_plumbob" />
 
-    <ImageView
-
-        android:id="@+id/jenny_target"
-        android:layout_width="44dp"
-        android:layout_height="85dp"
-        app:srcCompat="@drawable/jenny_plumbob" />
-
-
-    <LinearLayout
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:layout_gravity="center|bottom"
-        android:orientation="horizontal">
 
 
             <TextView
                 android:id="@+id/distance_id"
-                android:layout_width="100dp"
+                android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:text="20 m"
                 android:textAlignment="center"
+                android:layout_gravity="bottom|end"
                 android:textColor="#ffffff"
+                android:layout_marginLeft="170dp"
+                android:layout_marginBottom="210dp"
                 android:textSize="12sp" />
-</LinearLayout>
+
+    <TextView
+        android:id="@+id/distance_id"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="20 m"
+        android:textAlignment="center"
+        android:layout_gravity="bottom|end"
+        android:textColor="#ffffff"
+        android:layout_marginLeft="170dp"
+        android:layout_marginBottom="132dp"
+        android:textSize="12sp" />
+
+<TextView
+android:id="@+id/distance_id"
+android:layout_width="match_parent"
+android:layout_height="wrap_content"
+android:text="20 m"
+android:textAlignment="center"
+android:layout_gravity="bottom|end"
+android:textColor="#ffffff"
+android:layout_marginLeft="170dp"
+android:layout_marginBottom="54dp"
+android:textSize="12sp" />
+
 </FrameLayout>
 

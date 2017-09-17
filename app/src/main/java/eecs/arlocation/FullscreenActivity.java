@@ -164,7 +164,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     }
 
                     final TextView distancetext = (TextView) findViewById(R.id.distance_id);
-                    String distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
+                    String distance_string = String.valueOf((int) Math.round(distance)) + " m";
 
                     distancetext.setText(distance_string);
                     Log.d(t.name, String.valueOf(azimuth));
