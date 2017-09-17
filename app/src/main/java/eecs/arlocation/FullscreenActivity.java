@@ -353,3 +353,4 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         }
     }
 }
+
