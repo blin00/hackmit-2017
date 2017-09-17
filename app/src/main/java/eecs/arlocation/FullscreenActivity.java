@@ -1,39 +1,33 @@
 package eecs.arlocation;
 
 import android.Manifest;
-import android.annotation.SuppressLint;
+import android.content.Context;
+import android.content.pm.PackageManager;
+import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
 import android.hardware.SensorEvent;
 import android.hardware.SensorEventListener;
 import android.hardware.SensorManager;
-import android.location.Location;
-import android.media.Image;
-import android.os.HandlerThread;
-import android.os.Looper;
-import android.content.Context;
-import android.content.pm.PackageManager;
-import android.graphics.ImageFormat;
-import android.graphics.SurfaceTexture;
 import android.hardware.camera2.CameraAccessException;
 import android.hardware.camera2.CameraCaptureSession;
 import android.hardware.camera2.CameraCharacteristics;
 import android.hardware.camera2.CameraDevice;
 import android.hardware.camera2.CameraManager;
 import android.hardware.camera2.CameraMetadata;
-import android.hardware.camera2.CaptureFailure;
 import android.hardware.camera2.CaptureRequest;
-import android.hardware.camera2.TotalCaptureResult;
 import android.hardware.camera2.params.StreamConfigurationMap;
-import android.os.HandlerThread;
-import android.support.annotation.NonNull;
-import android.support.annotation.RequiresPermission;
-import android.support.v4.app.ActivityCompat;
-import android.support.v4.content.ContextCompat;import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
+import android.location.Location;
 import android.os.Bundle;
 import android.os.Handler;
+import android.os.HandlerThread;
+import android.os.Looper;
+import android.support.annotation.NonNull;
+import android.support.v4.app.ActivityCompat;
+import android.support.v4.content.ContextCompat;
+import android.support.v7.app.ActionBar;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
-import android.util.Size;import android.view.MotionEvent;
+import android.util.Size;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -74,9 +68,11 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     private HandlerThread mCameraHandlerThread;
     private Handler mCameraHandler;
     private Size bestSize;
-    private CameraCaptureSession previewCaptureSession;
+    private LocationController locationController;
+
     // arbitrary constants for permissions request
-    private static final int MY_PERMISSIONS_REQUEST_READ_CAMERA = 0;
+    public static final int MY_PERMISSIONS_REQUEST_READ_CAMERA = 0;
+    public static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
     public static float swRoll;
     public static float swPitch;
     public static float swAzimuth;
@@ -89,11 +85,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     public static float[] mAccelerometer = null;
     public static float[] mGeomagnetic = null;
 
-
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
-
-
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -123,7 +116,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         mCameraHandlerThread = new HandlerThread("CameraThread");
         mCameraHandlerThread.start();
         mCameraHandler = new Handler(mCameraHandlerThread.getLooper());
-
 
         final Handler h = new Handler(Looper.getMainLooper());
         final Runnable r = new Runnable() {
@@ -159,6 +151,9 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         };
         h.post(r);
         setupCamera();
+
+        locationController = new LocationController(this);
+        locationController.checkPermission();
     }
 
     @Override
@@ -273,7 +268,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                                 public void surfaceDestroyed(SurfaceHolder holder) {
                                     Log.d("AR", "surface destroyed");
                                     mDisplaySurface = null;
-                                    previewCaptureSession = null;
                                 }
                             });
                         }
@@ -310,7 +304,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 public void onConfigured(@NonNull CameraCaptureSession session) {
                     try {
                         Log.d("AR", "configured completed");
-                        previewCaptureSession = session;
                         session.setRepeatingRequest(captureRequestBuilder.build(), null, null);
                     } catch (CameraAccessException cae) {
                         throw new RuntimeException("Capture failed");
@@ -353,6 +346,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 // try again
                 setupCamera();
             }
+        } else if (requestCode == MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
+            locationController.checkPermission();
         }
     }
 }
