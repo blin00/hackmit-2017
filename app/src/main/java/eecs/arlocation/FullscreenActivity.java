@@ -2,6 +2,7 @@ package eecs.arlocation;
 
 import android.Manifest;
 import android.content.Context;
+import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.graphics.SurfaceTexture;
 import android.hardware.Sensor;
@@ -183,6 +184,13 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     public void doneWithPermissions() {
         setupCamera();
         locationController.setupLocation();
+        findViewById(R.id.hamburgermenu).setOnClickListener(new View.OnClickListener() {
+            public void onClick(View v) {
+                startActivity(new Intent(FullscreenActivity.this, CircleActivity.class));
+                setupCamera();
+                finish();
+            }
+        });
         updateHandler.post(updateRunnable);
     }
 
