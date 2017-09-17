@@ -34,6 +34,12 @@
         app:srcCompat="@drawable/ic_right_gray" />
 
     <ImageView
+        android:id="@+id/target"
+        android:layout_width="44dp"
+        android:layout_height="85dp"
+        app:srcCompat="@drawable/plumbob" />
+
+    <ImageView
         android:id="@+id/left"
         android:layout_width="30dp"
         android:layout_height="100dp"
