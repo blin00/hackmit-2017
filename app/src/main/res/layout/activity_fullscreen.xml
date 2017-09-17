@@ -27,16 +27,18 @@
 
     <ImageView
         android:id="@+id/right"
-        android:layout_width="70dp"
+        android:layout_width="40dp"
         android:layout_height="100dp"
-        android:layout_gravity="bottom|right"
+        android:layout_gravity="bottom|end"
+        android:layout_margin="20dp"
         app:srcCompat="@drawable/ic_right_gray" />
 
     <ImageView
         android:id="@+id/left"
-        android:layout_width="70dp"
+        android:layout_width="40dp"
         android:layout_height="100dp"
         android:layout_gravity="bottom"
+        android:layout_margin="20dp"
         app:srcCompat="@drawable/ic_left_gray" />
 
 </FrameLayout>
