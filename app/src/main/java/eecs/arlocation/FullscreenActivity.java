@@ -151,7 +151,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 distancetext.setText(distance_string);
                 Log.d("direction", String.valueOf(azimuth));
                 Log.d("thing", String.valueOf(diff));
-                Util.makeToast(FullscreenActivity.this, Double.toString(diff.getValue()));
                 if (diff.getValue() > 18) {
                     Log.d("thing", "LEFT LEFT LEFT");
                     brandon.setImageResource(R.drawable.brandon_left);
