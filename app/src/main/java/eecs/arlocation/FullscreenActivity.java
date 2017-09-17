@@ -134,9 +134,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 } else {
                     target.setVisibility(View.GONE);
                 }
-                ImageView left = (ImageView) findViewById(R.id.left);
                 ImageView right = (ImageView) findViewById(R.id.right);
-                final TextView helloTextView = (TextView) findViewById(R.id.name_id);
+                //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
 
                 final TextView distancetext = (TextView) findViewById(R.id.distance_id);
                 String distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
@@ -144,10 +143,10 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 distancetext.setText(distance_string);
                 Log.d("direction", String.valueOf(azimuth));
                 Log.d("thing", String.valueOf(diff));
-                if (diff > 18 && left.getVisibility() == View.VISIBLE) {
+                if (diff > 18) {
                     Log.d("thing", "LEFT LEFT LEFT");
                     right.setImageResource(R.drawable.brandon_left);
-                } else if (diff < -18 && right.getVisibility() == View.VISIBLE) {
+                } else if (diff < -18) {
                     Log.d("thing", "RIGHT RIGHT RIGHT");
                     right.setImageResource(R.drawable.brandon_right);
                 }
