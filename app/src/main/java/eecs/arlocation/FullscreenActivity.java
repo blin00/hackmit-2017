@@ -127,8 +127,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 Location destination = new Location("destination"); //replace
                 Location source = myLocation;
                 //Util.makeToast(FullscreenActivity.this, source.toString());
-                destination.setLongitude(-71.0966);
-                destination.setLatitude(42.3587);
+                destination.setLongitude(-71.1019655);
+                destination.setLatitude(42.3545758);
                 int distance = Math.round(source.distanceTo(destination));
                 Log.d("distance",String.valueOf(distance));
                 float mybear = (float) azimuth;
