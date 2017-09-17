@@ -67,7 +67,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     private float verticalAngle = 60;
 
     private float azimuth;
-    private float pitch;
+    private ExpFilter pitch;
+
     private Location myLocation;
 
     private SensorManager mSensorManager;
@@ -97,6 +98,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
             actionBar.hide();
         }
 
+        pitch = new ExpFilter(0.25);
+
         mContentView = (SurfaceView) findViewById(R.id.fullscreen_content);
 
         mCameraHandlerThread = new HandlerThread("CameraThread");
@@ -120,7 +123,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 targets.add(alex);
 
 
-                Log.d("", "HELLLOOOOOOOO");
                 for (Target t : targets) {
                     Location source = new Location("source");
                     source.setLatitude(42.356);
@@ -138,68 +140,19 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     double x = distance * Math.sin(Math.toRadians(t.exp.getValue()));
                     double y = distance * Math.cos(Math.toRadians(t.exp.getValue()));
                     double z = y * Math.tan(Math.toRadians(horizontalAngle / 2));
-                    int offset_x = -(int) (x / z * width / 2);
-                    double a = distance * Math.sin(Math.toRadians(pitch));
-                    double b = distance * Math.cos(Math.toRadians(pitch));
+                    int offset_x = -(int) Math.round(x / z * width / 2);
+                    double a = distance * Math.sin(Math.toRadians(pitch.getValue()));
+                    double b = distance * Math.cos(Math.toRadians(pitch.getValue()));
                     double c = b * Math.tan(Math.toRadians(verticalAngle / 2));
-                    int offset_y = -(int) (a / c * height / 2);
+                    int offset_y = -(int) Math.round(a / c * height / 2);
                     View target = t.plumbbob;
-                    // check that filtered angle is inside horizontal FOV
-                    // and unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
-                    if (t.exp.getValue() < horizontalAngle / 2
-                            && t.exp.getValue() > -horizontalAngle / 2
-                            && diffRaw < horizontalAngle
-                            && diffRaw > -horizontalAngle) {
-                        target.animate().x(width / 2 + offset_x).y(height / 2 + offset_y).setDuration(30).start();
+                    // check unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
+                    if (diffRaw < horizontalAngle && diffRaw > -horizontalAngle) {
+                        target.animate().x(width / 2 + offset_x).y(height / 2 + offset_y).setDuration(75).start();
                         target.setVisibility(View.VISIBLE);
                     } else {
                         target.setVisibility(View.GONE);
                     }
-/*
-                    Location destination = new Location("brandon_destination"); //replace
-                    Location source = myLocation;
-                    source.setLatitude(42.356);
-                    source.setLongitude(-71.102);
-                    destination.setLongitude(-71.1019655);
-                    destination.setLatitude(42.3545758);
-                    float distance = source.distanceTo(destination);
-                    float mybear = azimuth;
-                    float desirebear = source.bearingTo(destination);
-                    float diffRaw = mybear - desirebear;
-                    if (diffRaw < -180) diffRaw += 360;
-                    if (diffRaw >= 180) diffRaw -= 360;
-                    diff.update(diffRaw);
-                    int width = mContentView.getWidth();
-                    int height = mContentView.getHeight();
-                    double x = distance * Math.sin(Math.toRadians(diff.getValue()));
-                    double y = distance * Math.cos(Math.toRadians(diff.getValue()));
-                    double z = y * Math.tan(Math.toRadians(horizontalAngle / 2));
-                    int offset_x = -(int) (x / z * width / 2);
-                    double a = distance * Math.sin(Math.toRadians(pitch));
-                    double b = distance * Math.cos(Math.toRadians(pitch));
-                    double c = b * Math.tan(Math.toRadians(verticalAngle / 2));
-                    int offset_y = -(int) (a / c * height / 2);
-                    View target = findViewById(R.id.target);
-                    // check that filtered angle is inside horizontal FOV
-                    // and unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
-                    if (diff.getValue() < horizontalAngle / 2
-                            && diff.getValue() > -horizontalAngle / 2
-                            && diffRaw < horizontalAngle
-                            && diffRaw > -horizontalAngle) {
-                        target.animate().x(width / 2 + offset_x).y(height / 2 + offset_y).setDuration(30).start();
-                        target.setVisibility(View.VISIBLE);
-                    } else {
-                        target.setVisibility(View.GONE);
-                    }
-                    ImageView brandon = (ImageView) findViewById(R.id.brandon);*/
-                    //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
-
-
-                    //at the end, we need:
-                    // new image of plumbbob
-                    // new image of direction to go
-                    // update the location
-                    //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
 
                     final TextView distancetext = (TextView) findViewById(R.id.distance_id);
                     String distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
@@ -223,7 +176,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     }
                 }
 
-                updateHandler.postDelayed(this, 75);
+                updateHandler.postDelayed(this, 100);
             }
         };
         locationController = new LocationController(this);
@@ -297,8 +250,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 SensorManager.remapCoordinateSystem(R, SensorManager.AXIS_X, SensorManager.AXIS_Z, correctedR);
                 SensorManager.getOrientation(correctedR, orientation);
                 // at this point, orientation contains the azimuth(direction), pitch and roll values.
-                azimuth = (float) (180 * orientation[0] / Math.PI);
-                pitch = (float) (180 * orientation[1] / Math.PI);
+                azimuth = (float) Math.toDegrees(orientation[0]);
+                pitch.update(Math.toDegrees(orientation[1]));
 //                double roll = 180 * orientation[2] / Math.PI;
             }
         }
