@@ -10,5 +10,4 @@
         android:src = "@drawable/splash_screen"
         android:layout_gravity="center"/>
 
-
 </LinearLayout>
