@@ -66,23 +66,13 @@ public class LocationController {
         this.activity = activity;
     }
 
-    public void checkPermission() {
-        if (ContextCompat.checkSelfPermission(activity, android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED) {
-            setupLocation();
-        } else {
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    FullscreenActivity.MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-        }
-    }
-
-    private void setupLocation() {
+    public void setupLocation() {
         locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         if (ContextCompat.checkSelfPermission(activity, android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,
                     MIN_TIME_REQUEST, 1.0f, locationListener);
             updateLocation(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
         } else {
-            Util.makeToast(activity, "Turn on GPS plz");
             Intent settingsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             activity.startActivity(settingsIntent);
@@ -90,9 +80,11 @@ public class LocationController {
     }
 
     private void updateLocation(Location location) {
-        Log.d("ZZZZZ", "updated location " + location);
-        activity.setLocation(location);
-        Util.makeToast(activity, "updated location");
+//        Log.d("ZZZZZ", "updated location " + location);
+        if (location == null) {
+            return;
+        }
+        activity.user.updateLocation(location);
+        activity.database.child("users").child(activity.user.name).setValue(activity.user);
     }
-
 }

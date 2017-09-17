@@ -4,19 +4,10 @@ import android.app.Activity;
 import android.content.Intent;
 import android.os.Bundle;
 import android.os.Handler;
-import android.support.v7.app.ActionBar;
-import android.support.v7.app.AppCompatActivity;
-import android.view.SurfaceView;
-import android.view.View;
 import android.view.Window;
 import android.view.WindowManager;
 
-/**
- * Created by chennosaurus on 9/16/17.
- */
-
 public class SplashActivity extends Activity {
-    private View mContentView;
 
     @Override
     public void onCreate(Bundle savedInstanceState) {
@@ -29,13 +20,10 @@ public class SplashActivity extends Activity {
 
 //set content view AFTER ABOVE sequence (to avoid crash)
         this.setContentView(R.layout.activity_splash);
-
-
-
         int secondsDelayed = 1;
         new Handler().postDelayed(new Runnable() {
             public void run() {
-                startActivity(new Intent(SplashActivity.this, FullscreenActivity.class));
+                startActivity(new Intent(SplashActivity.this, LoginActivity.class));
                 finish();
             }
         }, secondsDelayed * 1000);
