@@ -34,14 +34,21 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.view.ViewGroup;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.ChildEventListener;
+import com.google.firebase.database.DataSnapshot;
+import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
+import com.google.firebase.database.ValueEventListener;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 
 import static android.hardware.camera2.CameraMetadata.LENS_FACING_BACK;
@@ -65,7 +72,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     private FirebaseUser currentUser;
     public DatabaseReference database;
     public User user;
-
+    private HashMap<String, Target> targets;
     private CameraCaptureSession previewCaptureSession;
 
     // temp values - is set by code below
@@ -94,6 +101,11 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
         user = new User(getIntent().getStringExtra("name"));
+        final Target brandon = new Target("Brandon Lin", new Location("brandon_location"), R.drawable.brandon_left,R.drawable.brandon_right,R.drawable.brandon_center,findViewById(R.id.brandon_target), findViewById(R.id.brandon) );
+        final Target zhongxia = new Target("Zhongxia Yan", new Location("zhongxia_location"),R.drawable.zhongxia_left,R.drawable.zhongxia_right,R.drawable.zhongxia_center ,findViewById(R.id.zhongxia_target), findViewById(R.id.zhongxia));
+        final Target alex = new Target("Alex Chen", new Location("alex_location"), R.drawable.alex_left,R.drawable.alex_right,R.drawable.alex_center ,findViewById(R.id.alex_target), findViewById(R.id.alex));
+        final Target jenny = new Target("Jenny Liu", new Location("jenny_location"), R.drawable.jenny_left,R.drawable.jenny_right,R.drawable.jenny_center ,findViewById(R.id.jenny_target), findViewById(R.id.jenny));
+
 
         firebaseAuth = FirebaseAuth.getInstance();
         currentUser = firebaseAuth.getCurrentUser();
@@ -116,9 +128,68 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         mCameraHandlerThread.start();
         mCameraHandler = new Handler(mCameraHandlerThread.getLooper());
 
-        final Target brandon = new Target("brandon", new Location("brandon_location"), R.drawable.brandon_left,R.drawable.brandon_right,R.drawable.brandon_center,findViewById(R.id.brandon_target), findViewById(R.id.brandon) );
-        final Target zhongxia = new Target("z", new Location("zhongxia_location"),R.drawable.zhongxia_left,R.drawable.zhongxia_right,R.drawable.zhongxia_center ,findViewById(R.id.zhongxia_target), findViewById(R.id.zhongxia));
-        final Target alex = new Target("alex", new Location("alex_location"), R.drawable.alex_left,R.drawable.alex_right,R.drawable.alex_center ,findViewById(R.id.alex_target), findViewById(R.id.alex));
+        // Attach a listener to read the data at our posts reference
+        database.child("users").addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                //append the child to the map
+                String name = (String) dataSnapshot.child("name").getValue();
+                if (name.equals("Jenny Liu") && !name.equals(user.name)) {
+                    targets.put(name, jenny);
+                }
+                else if (name.equals("Alex Chen")  && !name.equals(user.name)){
+                    targets.put(name, alex);
+                }
+                else if (name.equals("Brandon Lin")  && !name.equals(user.name)){
+                    targets.put(name, brandon);
+                }
+                else if (!name.equals(user.name)){
+                    targets.put(name, zhongxia);
+                }
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+                String name = (String) dataSnapshot.child("name").getValue();
+                if (!name.equals(user.name)) {
+                    float lon = (float) (double) dataSnapshot.child("longitude").getValue();
+                    float lat = (float) (double) dataSnapshot.child("latitude").getValue();
+                    //Util.makeToast(FullscreenActivity.this, Float.toString(lon));;
+                    targets.get(name).setLocation(lon, lat);
+                    //Log.d("long", lon);
+                    //Log.d("lat", lat);
+                }
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+                //remove the child from the map
+                //recalculate the new margins for each element
+                String name = (String) dataSnapshot.child("name").getValue();
+                Target remove = targets.get(name);
+                remove.plumbbob.setVisibility(View.GONE);
+                for (Target t : targets.values()) {
+                    //do some shit that updates the values
+
+                }
+                targets.remove(name);
+
+
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                System.out.println("The read failed: " + databaseError.getCode());
+            }
+        });
+
         updateHandler = new Handler(Looper.getMainLooper());
         updateRunnable = new Runnable() {
             public void run() {
@@ -126,13 +197,12 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 alex.setLocation(-71.0019655, 43.3545758);
                 brandon.setLocation(-71.1019655, 42.3545758);
 
-                ArrayList<Target> targets = new ArrayList<Target>();
-                targets.add(brandon);
-                targets.add(zhongxia);
-                targets.add(alex);
 
 
-                for (Target t : targets) {
+                targets = new HashMap<String, Target>();
+
+
+                for (Target t : targets.values()) {
                     Location source = new Location("source");
                     source.setLatitude(42.356);
                     source.setLongitude(-71.102);
@@ -178,7 +248,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                         t.set_pointer_direction(0);
                     }
                 }
-
                 updateHandler.postDelayed(this, 75);
             }
         };
