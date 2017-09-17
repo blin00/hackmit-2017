@@ -28,6 +28,8 @@ import android.support.v7.app.ActionBar;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Size;
+import android.util.SizeF;
+import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
@@ -74,6 +76,12 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     // arbitrary constants for permissions request
     public static final int MY_PERMISSIONS_REQUEST_READ_CAMERA = 0;
     public static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+
+    private CameraCaptureSession previewCaptureSession;
+
+    // hardcode temp value to be overridden later
+    private float horizontalAngle = 60;
+
     public static float swRoll;
     public static float swPitch;
     public static float swAzimuth;
@@ -108,12 +116,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
 
         mContentView = (SurfaceView) findViewById(R.id.fullscreen_content);
 
-        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
-                | View.SYSTEM_UI_FLAG_FULLSCREEN
-                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
-                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
-                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
-                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
 
         mCameraHandlerThread = new HandlerThread("CameraThread");
         mCameraHandlerThread.start();
@@ -132,6 +134,18 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 float mybear = (float) azimuth;
                 float desirebear = source.bearingTo(destination);
                 float diff = mybear - desirebear;
+                int width = mContentView.getWidth();
+                int height = mContentView.getHeight();
+                double x = distance * Math.sin(diff * Math.PI / 180);
+                double y = distance * Math.cos(diff * Math.PI / 180);
+                double z = y * Math.tan(horizontalAngle / 2);
+                int offset = (int) (x / z * width / 2);
+                View target = findViewById(R.id.target);
+                if (diff < horizontalAngle / 2 || diff > -horizontalAngle / 2) {
+                    target.animate().x(width / 2 + offset).y(10).setDuration(0).start();
+                } else {
+                    target.setVisibility(View.GONE);
+                }
                 ImageView left = (ImageView) findViewById(R.id.left);
                 ImageView right = (ImageView) findViewById(R.id.right);
                 final TextView helloTextView = (TextView) findViewById(R.id.name_id);
@@ -186,6 +200,13 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
 
         mSensorManager.registerListener(this, accelerometer, SensorManager.SENSOR_DELAY_GAME);
         mSensorManager.registerListener(this, magnetometer, SensorManager.SENSOR_DELAY_GAME);
+
+        mContentView.setSystemUiVisibility(View.SYSTEM_UI_FLAG_LOW_PROFILE
+                | View.SYSTEM_UI_FLAG_FULLSCREEN
+                | View.SYSTEM_UI_FLAG_LAYOUT_STABLE
+                | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY
+                | View.SYSTEM_UI_FLAG_LAYOUT_HIDE_NAVIGATION
+                | View.SYSTEM_UI_FLAG_HIDE_NAVIGATION);
     }
 
     @Override
@@ -258,6 +279,19 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     }
                     Log.d("AR", "" + bestSize);
 
+                    float[] focalLengths = characteristics.get(CameraCharacteristics.LENS_INFO_AVAILABLE_FOCAL_LENGTHS);
+                    SizeF sensorSize = characteristics.get(CameraCharacteristics.SENSOR_INFO_PHYSICAL_SIZE);
+
+                    float w = 0.5f * sensorSize.getWidth();
+                    float h = 0.5f * sensorSize.getHeight();
+                    Log.d("AR", "sensorSize = " + 2 * w + ", " + 2 * h);
+                    float focalLength = focalLengths[0];
+                    horizontalAngle = (float) Math.toDegrees(2 * Math.atan(w / focalLength));
+//                    float verticalAngle = (float) Math.toDegrees(2 * Math.atan(h / focalLength));
+                    Log.d("AR", "using first focalLength = " + focalLength + "mm");
+                    Log.d("AR", "horizonalAngle = " + horizontalAngle);
+//                    Log.d("AR", "verticalAngle = " + verticalAngle);
+
                     cameraManager.openCamera(id, new CameraDevice.StateCallback() {
                         @Override
                         public void onOpened(@NonNull CameraDevice camera) {
@@ -310,6 +344,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         try {
             final CaptureRequest.Builder captureRequestBuilder = mCameraDevice.createCaptureRequest(CameraDevice.TEMPLATE_PREVIEW);
             captureRequestBuilder.set(CaptureRequest.CONTROL_MODE, CameraMetadata.CONTROL_MODE_AUTO);
+            captureRequestBuilder.set(CaptureRequest.CONTROL_AF_MODE, CameraMetadata.CONTROL_AF_MODE_CONTINUOUS_PICTURE);
             captureRequestBuilder.set(CaptureRequest.COLOR_CORRECTION_MODE, CameraMetadata.COLOR_CORRECTION_MODE_HIGH_QUALITY);
             captureRequestBuilder.set(CaptureRequest.CONTROL_AE_MODE, CameraMetadata.CONTROL_AE_MODE_ON);
             captureRequestBuilder.set(CaptureRequest.CONTROL_AWB_MODE, CaptureRequest.CONTROL_AWB_MODE_AUTO);
