@@ -120,6 +120,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 targets.add(alex);
 
 
+                Log.d("", "HELLLOOOOOOOO");
                 for (Target t : targets) {
                     Location source = new Location("source");
                     source.setLatitude(42.356);
