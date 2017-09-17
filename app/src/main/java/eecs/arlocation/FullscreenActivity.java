@@ -105,16 +105,16 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         final Handler h = new Handler(Looper.getMainLooper());
         final Runnable r = new Runnable() {
             public void run() {
-                Location destination = new Location("destination"); //replace
+                Location brandon_destination = new Location("brandon_destination"); //replace
                 Location source = myLocation;
                 source.setLatitude(42.356);
                 source.setLongitude(-71.102);
-                destination.setLongitude(-71.1019655);
-                destination.setLatitude(42.3545758);
-                float distance = source.distanceTo(destination);
+                brandon_destination.setLongitude(-71.1019655);
+                brandon_destination.setLatitude(42.3545758);
+                float distance = source.distanceTo(brandon_destination);
                 Log.d("distance",String.valueOf(distance));
                 float mybear = azimuth;
-                float desirebear = source.bearingTo(destination);
+                float desirebear = source.bearingTo(brandon_destination);
                 float diffUpdate = mybear - desirebear;
                 if (diffUpdate < -180) diffUpdate += 360;
                 if (diffUpdate >= 180) diffUpdate -= 360;
@@ -137,7 +137,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 } else {
                     target.setVisibility(View.GONE);
                 }
-                ImageView right = (ImageView) findViewById(R.id.right);
+                ImageView brandon = (ImageView) findViewById(R.id.brandon);
                 //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
 
                 final TextView distancetext = (TextView) findViewById(R.id.distance_id);
@@ -148,14 +148,56 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 Log.d("thing", String.valueOf(diff));
                 if (diff.getValue() > 18) {
                     Log.d("thing", "LEFT LEFT LEFT");
-                    right.setImageResource(R.drawable.brandon_left);
+                    brandon.setImageResource(R.drawable.brandon_left);
                 } else if (diff.getValue() < -18) {
                     Log.d("thing", "RIGHT RIGHT RIGHT");
-                    right.setImageResource(R.drawable.brandon_right);
+                    brandon.setImageResource(R.drawable.brandon_right);
                 }
                 else {
                     Log.d("thing", "CENTER CENTER CENTER");
-                    right.setImageResource(R.drawable.brandon_center);
+                    brandon.setImageResource(R.drawable.brandon_center);
+                }
+
+                ImageView alex = (ImageView) findViewById(R.id.alex);
+                //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
+
+                final TextView alex_distance = (TextView) findViewById(R.id.distance_id);
+                String alex_distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
+
+                distancetext.setText(distance_string);
+                Log.d("direction", String.valueOf(azimuth));
+                Log.d("thing", String.valueOf(diff));
+                if (diff.getValue() > 18) {
+                    Log.d("thing", "LEFT LEFT LEFT");
+                    alex.setImageResource(R.drawable.alex_left);
+                } else if (diff.getValue() < -18) {
+                    Log.d("thing", "RIGHT RIGHT RIGHT");
+                    alex.setImageResource(R.drawable.alex_right);
+                }
+                else {
+                    Log.d("thing", "CENTER CENTER CENTER");
+                    alex.setImageResource(R.drawable.alex_center);
+                }
+
+                ImageView zhongxia = (ImageView) findViewById(R.id.zhongxia);
+                //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
+
+                final TextView zhongxia_distance = (TextView) findViewById(R.id.distance_id);
+                String zhongxia_distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
+
+                distancetext.setText(distance_string);
+                Log.d("direction", String.valueOf(azimuth));
+                Log.d("thing", String.valueOf(diff));
+                if (diff.getValue() > 18) {
+                    Log.d("thing", "LEFT LEFT LEFT");
+                    zhongxia.setImageResource(R.drawable.zhongxia_left);
+                } else if (diff.getValue() < -18) {
+                    Log.d("thing", "RIGHT RIGHT RIGHT");
+                    zhongxia.setImageResource(R.drawable.zhongxia_right);
+                }
+                else {
+                    Log.d("thing", "CENTER CENTER CENTER");
+                    zhongxia.setImageResource(R.drawable.zhongxia_center);
                 }
 
                 h.postDelayed(this, 75);
