@@ -271,7 +271,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     float w = 0.5f * sensorSize.getWidth();
                     float h = 0.5f * sensorSize.getHeight();
                     Log.d("AR", "sensorSize = " + 2 * w + ", " + 2 * h);
-                    float focalLength = focalLengths[0];
+                    float focalLength = focalLengths[focalLengths.length - 1];
                     horizontalAngle = (float) Math.toDegrees(2 * Math.atan(w / focalLength));
 //                    float verticalAngle = (float) Math.toDegrees(2 * Math.atan(h / focalLength));
                     Log.d("AR", "using first focalLength = " + focalLength + "mm");
