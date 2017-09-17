@@ -62,10 +62,12 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
 
     private CameraCaptureSession previewCaptureSession;
 
-    // hardcode temp value to be overridden later
+    // temp values - is set by code below
     private float horizontalAngle = 60;
+    private float verticalAngle = 60;
 
     private float azimuth;
+    private float pitch;
     private ExpFilter diff;
     private Location myLocation;
 
@@ -123,7 +125,11 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 double x = distance * Math.sin(Math.toRadians(diff.getValue()));
                 double y = distance * Math.cos(Math.toRadians(diff.getValue()));
                 double z = y * Math.tan(Math.toRadians(horizontalAngle / 2));
-                int offset = -(int) (x / z * width / 2);
+                int offset_x = -(int) (x / z * width / 2);
+                double a = distance * Math.sin(Math.toRadians(pitch));
+                double b = distance * Math.cos(Math.toRadians(pitch));
+                double c = b * Math.tan(Math.toRadians(verticalAngle / 2));
+                int offset_y = -(int) (a / c * height / 2);
                 View target = findViewById(R.id.target);
                 // check that filtered angle is inside horizontal FOV
                 // and unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
@@ -131,7 +137,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                         && diff.getValue() > -horizontalAngle / 2
                         && diffRaw < horizontalAngle
                         && diffRaw > -horizontalAngle) {
-                    target.animate().x(width / 2 + offset).y(20).setDuration(30).start();
+                    target.animate().x(width / 2 + offset_x).y(height / 2 + offset_y).setDuration(30).start();
                     target.setVisibility(View.VISIBLE);
                 } else {
                     target.setVisibility(View.GONE);
@@ -278,8 +284,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 SensorManager.getOrientation(correctedR, orientation);
                 // at this point, orientation contains the azimuth(direction), pitch and roll values.
                 azimuth = (float) (180 * orientation[0] / Math.PI);
-                double pitch = 180 * orientation[1] / Math.PI;
-                double roll = 180 * orientation[2] / Math.PI;
+                pitch = (float) (180 * orientation[1] / Math.PI);
+//                double roll = 180 * orientation[2] / Math.PI;
             }
         }
     }
@@ -315,10 +321,10 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     Log.d("AR", "sensorSize = " + 2 * w + ", " + 2 * h);
                     float focalLength = minf(focalLengths);
                     horizontalAngle = (float) Math.toDegrees(2 * Math.atan(w / focalLength));
-//                    float verticalAngle = (float) Math.toDegrees(2 * Math.atan(h / focalLength));
-                    Log.d("AR", "using first focalLength = " + focalLength + "mm");
+                    verticalAngle = (float) Math.toDegrees(2 * Math.atan(h / focalLength));
+                    Log.d("AR", "using smallest focalLength = " + focalLength + "mm");
                     Log.d("AR", "horizonalAngle = " + horizontalAngle);
-//                    Log.d("AR", "verticalAngle = " + verticalAngle);
+                    Log.d("AR", "verticalAngle = " + verticalAngle);
 
                     cameraManager.openCamera(id, new CameraDevice.StateCallback() {
                         @Override
