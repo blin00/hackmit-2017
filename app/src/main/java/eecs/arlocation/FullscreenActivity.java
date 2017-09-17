@@ -105,39 +105,38 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         final Handler h = new Handler(Looper.getMainLooper());
         final Runnable r = new Runnable() {
             public void run() {
-                Location destination = new Location("destination"); //replace
+                Location destination = new Location("brandon_destination"); //replace
                 Location source = myLocation;
                 source.setLatitude(42.356);
                 source.setLongitude(-71.102);
                 destination.setLongitude(-71.1019655);
                 destination.setLatitude(42.3545758);
                 float distance = source.distanceTo(destination);
-                Log.d("distance",String.valueOf(distance));
                 float mybear = azimuth;
                 float desirebear = source.bearingTo(destination);
-                float diffUpdate = mybear - desirebear;
-                if (diffUpdate < -180) diffUpdate += 360;
-                if (diffUpdate >= 180) diffUpdate -= 360;
-                diff.update(diffUpdate);
+                float diffRaw = mybear - desirebear;
+                if (diffRaw < -180) diffRaw += 360;
+                if (diffRaw >= 180) diffRaw -= 360;
+                diff.update(diffRaw);
                 int width = mContentView.getWidth();
                 int height = mContentView.getHeight();
-                double x = distance * Math.sin(diff.getValue() * Math.PI / 180);
-                double y = distance * Math.cos(diff.getValue() * Math.PI / 180);
-                double z = y * Math.tan(horizontalAngle / 2);
+                double x = distance * Math.sin(Math.toRadians(diff.getValue()));
+                double y = distance * Math.cos(Math.toRadians(diff.getValue()));
+                double z = y * Math.tan(Math.toRadians(horizontalAngle / 2));
                 int offset = -(int) (x / z * width / 2);
                 View target = findViewById(R.id.target);
                 // check that filtered angle is inside horizontal FOV
                 // and unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
                 if (diff.getValue() < horizontalAngle / 2
                         && diff.getValue() > -horizontalAngle / 2
-                        && diffUpdate < horizontalAngle
-                        && diffUpdate > -horizontalAngle) {
+                        && diffRaw < horizontalAngle
+                        && diffRaw > -horizontalAngle) {
                     target.animate().x(width / 2 + offset).y(20).setDuration(30).start();
                     target.setVisibility(View.VISIBLE);
                 } else {
                     target.setVisibility(View.GONE);
                 }
-                ImageView right = (ImageView) findViewById(R.id.right);
+                ImageView brandon = (ImageView) findViewById(R.id.brandon);
                 //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
 
                 final TextView distancetext = (TextView) findViewById(R.id.distance_id);
@@ -149,14 +148,56 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 Util.makeToast(FullscreenActivity.this, Double.toString(diff.getValue()));
                 if (diff.getValue() > 18) {
                     Log.d("thing", "LEFT LEFT LEFT");
-                    right.setImageResource(R.drawable.brandon_left);
+                    brandon.setImageResource(R.drawable.brandon_left);
                 } else if (diff.getValue() < -18) {
                     Log.d("thing", "RIGHT RIGHT RIGHT");
-                    right.setImageResource(R.drawable.brandon_right);
+                    brandon.setImageResource(R.drawable.brandon_right);
                 }
                 else {
                     Log.d("thing", "CENTER CENTER CENTER");
-                    right.setImageResource(R.drawable.brandon_center);
+                    brandon.setImageResource(R.drawable.brandon_center);
+                }
+
+                ImageView alex = (ImageView) findViewById(R.id.alex);
+                //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
+
+                final TextView alex_distance = (TextView) findViewById(R.id.distance_id);
+                String alex_distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
+
+                distancetext.setText(distance_string);
+                Log.d("direction", String.valueOf(azimuth));
+                Log.d("thing", String.valueOf(diff));
+                if (diff.getValue() > 18) {
+                    Log.d("thing", "LEFT LEFT LEFT");
+                    alex.setImageResource(R.drawable.alex_left);
+                } else if (diff.getValue() < -18) {
+                    Log.d("thing", "RIGHT RIGHT RIGHT");
+                    alex.setImageResource(R.drawable.alex_right);
+                }
+                else {
+                    Log.d("thing", "CENTER CENTER CENTER");
+                    alex.setImageResource(R.drawable.alex_center);
+                }
+
+                ImageView zhongxia = (ImageView) findViewById(R.id.zhongxia);
+                //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
+
+                final TextView zhongxia_distance = (TextView) findViewById(R.id.distance_id);
+                String zhongxia_distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
+
+                distancetext.setText(distance_string);
+                Log.d("direction", String.valueOf(azimuth));
+                Log.d("thing", String.valueOf(diff));
+                if (diff.getValue() > 18) {
+                    Log.d("thing", "LEFT LEFT LEFT");
+                    zhongxia.setImageResource(R.drawable.zhongxia_left);
+                } else if (diff.getValue() < -18) {
+                    Log.d("thing", "RIGHT RIGHT RIGHT");
+                    zhongxia.setImageResource(R.drawable.zhongxia_right);
+                }
+                else {
+                    Log.d("thing", "CENTER CENTER CENTER");
+                    zhongxia.setImageResource(R.drawable.zhongxia_center);
                 }
 
                 h.postDelayed(this, 75);

@@ -26,7 +26,21 @@
     </FrameLayout>
 
     <ImageView
-        android:id="@+id/right"
+        android:id="@+id/zhongxia"
+        android:layout_width="300dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center|bottom"
+        android:layout_margin="90dp"
+        app:srcCompat="@drawable/zhongxia_right" />
+    <ImageView
+        android:id="@+id/alex"
+        android:layout_width="300dp"
+        android:layout_height="100dp"
+        android:layout_gravity="center|bottom"
+        android:layout_margin="170dp"
+        app:srcCompat="@drawable/alex_right" />
+    <ImageView
+        android:id="@+id/brandon"
         android:layout_width="300dp"
         android:layout_height="100dp"
         android:layout_gravity="center|bottom"
