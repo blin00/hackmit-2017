@@ -46,7 +46,7 @@
         android:layout_margin="170dp"
         app:srcCompat="@drawable/alex_right" />
     <ImageView
-        android:id="@+id/"
+        android:id="@+id/brandon"
         android:layout_width="300dp"
         android:layout_height="100dp"
         android:layout_gravity="center|bottom"
