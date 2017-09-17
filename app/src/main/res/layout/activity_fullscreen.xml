@@ -30,7 +30,7 @@
         android:layout_width="40dp"
         android:layout_height="100dp"
         android:layout_gravity="bottom|end"
-        android:layout_margin="20dp"
+        android:layout_margin="40dp"
         app:srcCompat="@drawable/ic_right_gray" />
 
     <ImageView
@@ -38,7 +38,40 @@
         android:layout_width="40dp"
         android:layout_height="100dp"
         android:layout_gravity="bottom"
-        android:layout_margin="20dp"
+        android:layout_margin="40dp"
         app:srcCompat="@drawable/ic_left_gray" />
 
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/name_id"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="Alex Chen"
+            android:layout_gravity="center|bottom"
+            android:textAlignment="center"
+            android:layout_marginBottom="45dp"
+            android:textSize="25dp"
+            android:textColor="#ffffff"
+            />
+    </LinearLayout>
+    <LinearLayout
+        xmlns:android="http://schemas.android.com/apk/res/android"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent">
+        <TextView
+            android:id="@+id/distance_id"
+            android:layout_height="wrap_content"
+            android:layout_width="match_parent"
+            android:text="20 meters away"
+            android:layout_gravity="center|bottom"
+            android:textAlignment="center"
+            android:layout_marginBottom="30dp"
+            android:textSize="18dp"
+            android:textColor="#ffffff"
+            />
+    </LinearLayout>
 </FrameLayout>
+
