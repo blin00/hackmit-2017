@@ -66,20 +66,7 @@ public class LocationController {
         this.activity = activity;
     }
 
-    public boolean checkPermission() {
-        if (ContextCompat.checkSelfPermission(activity, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
-            Log.d("AR", "location perms success");
-            setupLocation();
-            return true;
-        } else {
-            Log.d("AR", "location perms retry");
-            ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
-                    FullscreenActivity.MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
-            return false;
-        }
-    }
-
-    private void setupLocation() {
+    public void setupLocation() {
         locationManager = (LocationManager) activity.getSystemService(Context.LOCATION_SERVICE);
         if (ContextCompat.checkSelfPermission(activity, android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED && locationManager.isProviderEnabled(LocationManager.GPS_PROVIDER)) {
             locationManager.requestLocationUpdates(LocationManager.GPS_PROVIDER,

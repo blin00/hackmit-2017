@@ -55,10 +55,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     private Handler mCameraHandler;
     private Size bestSize;
     private LocationController locationController;
-
-    // arbitrary constants for permissions request
-    public static final int MY_PERMISSIONS_REQUEST_READ_CAMERA = 0;
-    public static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private PermissionController permissionController;
 
     private CameraCaptureSession previewCaptureSession;
 
@@ -106,13 +103,12 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         mCameraHandlerThread.start();
         mCameraHandler = new Handler(mCameraHandlerThread.getLooper());
 
+        final Target brandon = new Target("brandon", new Location("brandon_location"), R.drawable.brandon_left,R.drawable.brandon_right,R.drawable.brandon_center,findViewById(R.id.brandon_target), findViewById(R.id.brandon) );
+        final Target zhongxia = new Target("z", new Location("zhongxia_location"),R.drawable.zhongxia_left,R.drawable.zhongxia_right,R.drawable.zhongxia_center ,findViewById(R.id.zhongxia_target), findViewById(R.id.zhongxia));
+        final Target alex = new Target("alex", new Location("alex_location"), R.drawable.alex_left,R.drawable.alex_right,R.drawable.alex_center ,findViewById(R.id.alex_target), findViewById(R.id.alex));
         updateHandler = new Handler(Looper.getMainLooper());
         updateRunnable = new Runnable() {
             public void run() {
-                Target brandon = new Target("brandon", new Location("brandon_location"), R.drawable.brandon_left,R.drawable.brandon_right,R.drawable.brandon_center,findViewById(R.id.brandon_target), findViewById(R.id.brandon) );
-                Target zhongxia = new Target("z", new Location("zhongxia_location"),R.drawable.zhongxia_left,R.drawable.zhongxia_right,R.drawable.zhongxia_center ,findViewById(R.id.zhongxia_target), findViewById(R.id.zhongxia));
-                Target alex = new Target("alex", new Location("alex_location"), R.drawable.alex_left,R.drawable.alex_right,R.drawable.alex_center ,findViewById(R.id.alex_target), findViewById(R.id.alex));
-
                 zhongxia.setLocation(-91.3019655, 42.1545758);
                 alex.setLocation(-71.0019655, 43.3545758);
                 brandon.setLocation(-71.1019655, 42.3545758);
@@ -148,7 +144,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     View target = t.plumbbob;
                     // check unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
                     if (diffRaw < horizontalAngle && diffRaw > -horizontalAngle) {
-                        target.animate().x(width / 2 + offset_x).y(height / 2 + offset_y).setDuration(75).start();
+                        target.animate().x(width / 2 + offset_x).y(height / 2 + offset_y).setDuration(30).start();
                         target.setVisibility(View.VISIBLE);
                     } else {
                         target.setVisibility(View.GONE);
@@ -176,11 +172,18 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     }
                 }
 
-                updateHandler.postDelayed(this, 100);
+                updateHandler.postDelayed(this, 75);
             }
         };
         locationController = new LocationController(this);
+        permissionController = new PermissionController(this);
+        permissionController.getAllPermissions();
+    }
+
+    public void doneWithPermissions() {
         setupCamera();
+        locationController.setupLocation();
+        updateHandler.post(updateRunnable);
     }
 
     @Override
@@ -215,19 +218,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         mSensorManager.unregisterListener(this, magnetometer);
     }
 
-    private void setupCamera() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.d("AR", "requesting camera perms");
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CAMERA},
-                    MY_PERMISSIONS_REQUEST_READ_CAMERA);
-        } else {
-            Log.d("AR", "already have camera perms");
-            finishSetupCamera();
-        }
-    }
-
     @Override
     public void onSensorChanged(SensorEvent event) {
         // onSensorChanged gets called for each sensor so we have to remember the values
@@ -258,7 +248,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     }
 
     @SuppressWarnings({"MissingPermission"})
-    private void finishSetupCamera() {
+    private void setupCamera() {
         CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
             String[] idList = cameraManager.getCameraIdList();
@@ -339,9 +329,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
-        if (locationController.checkPermission()) {
-            updateHandler.post(updateRunnable);
-        }
     }
 
     private void startPreview() {
@@ -390,21 +377,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[],
                                            int[] grantResults) {
-        if (requestCode == MY_PERMISSIONS_REQUEST_READ_CAMERA) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d("AR", "camera perms success");
-                finishSetupCamera();
-            } else {
-                // try again
-                Log.d("AR", "camera perms retry");
-                setupCamera();
-            }
-        } else if (requestCode == MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            if (locationController.checkPermission()) {
-                updateHandler.post(updateRunnable);
-            }
-        }
+        permissionController.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     public void setLocation(Location l){
