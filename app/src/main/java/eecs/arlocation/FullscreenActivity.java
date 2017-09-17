@@ -78,6 +78,9 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     private float[] mAccelerometer = null;
     private float[] mGeomagnetic = null;
 
+    private Runnable updateRunnable;
+    private Handler updateHandler;
+
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
 
@@ -99,13 +102,12 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
 
         mContentView = (SurfaceView) findViewById(R.id.fullscreen_content);
 
-
         mCameraHandlerThread = new HandlerThread("CameraThread");
         mCameraHandlerThread.start();
         mCameraHandler = new Handler(mCameraHandlerThread.getLooper());
 
-        final Handler h = new Handler(Looper.getMainLooper());
-        final Runnable r = new Runnable() {
+        updateHandler = new Handler(Looper.getMainLooper());
+        updateRunnable = new Runnable() {
             public void run() {
                 Location destination = new Location("brandon_destination"); //replace
                 Location source = myLocation;
@@ -205,15 +207,11 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     zhongxia.setImageResource(R.drawable.zhongxia_center);
                 }
 
-                h.postDelayed(this, 75);
+                updateHandler.postDelayed(this, 75);
             }
-
         };
-        h.post(r);
-        setupCamera();
-
         locationController = new LocationController(this);
-        locationController.checkPermission();
+        setupCamera();
     }
 
     @Override
@@ -425,12 +423,16 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d("AR", "camera perms success");
                 finishSetupCamera();
+                locationController.checkPermission();
             } else {
                 // try again
+                Log.d("AR", "camera perms retry");
                 setupCamera();
             }
         } else if (requestCode == MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            locationController.checkPermission();
+            if (locationController.checkPermission()) {
+                updateHandler.post(updateRunnable);
+            }
         }
     }
 
