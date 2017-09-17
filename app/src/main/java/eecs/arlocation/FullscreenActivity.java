@@ -64,7 +64,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     // hardcode temp value to be overridden later
     private float horizontalAngle = 60;
 
-    private double azimuth;
+    private float azimuth;
+    private ExpFilter diff;
     private Location myLocation;
 
     private SensorManager mSensorManager;
@@ -86,7 +87,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         mContentView = (SurfaceView) findViewById(R.id.fullscreen_content);
-
+        diff = new ExpFilter(0.25);
 
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
@@ -111,24 +112,25 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 destination.setLatitude(42.3545758);
                 float distance = source.distanceTo(destination);
                 Log.d("distance",String.valueOf(distance));
-                float mybear = (float) azimuth;
+                float mybear = azimuth;
                 float desirebear = source.bearingTo(destination);
-                float diff = mybear - desirebear;
-                if (diff < -180) diff += 360;
-                if (diff >= 180) diff -= 360;
-                Log.i("AR", "me: " + mybear);
-                Log.i("AR", "desired: " + desirebear);
-                Log.i("AR", "diff: " + diff);
+                float diffUpdate = mybear - desirebear;
+                if (diffUpdate < -180) diffUpdate += 360;
+                if (diffUpdate >= 180) diffUpdate -= 360;
+                diff.update(diffUpdate);
                 int width = mContentView.getWidth();
                 int height = mContentView.getHeight();
-                double x = distance * Math.sin(diff * Math.PI / 180);
-                double y = distance * Math.cos(diff * Math.PI / 180);
+                double x = distance * Math.sin(diff.getValue() * Math.PI / 180);
+                double y = distance * Math.cos(diff.getValue() * Math.PI / 180);
                 double z = y * Math.tan(horizontalAngle / 2);
                 int offset = -(int) (x / z * width / 2);
-                Log.i("AR", "offset: " + offset);
-                Log.i("AR", "alpha: " + horizontalAngle);
                 View target = findViewById(R.id.target);
-                if (diff < horizontalAngle / 2 && diff > -horizontalAngle / 2) {
+                // check that filtered angle is inside horizontal FOV
+                // and unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
+                if (diff.getValue() < horizontalAngle / 2
+                        && diff.getValue() > -horizontalAngle / 2
+                        && diffUpdate < horizontalAngle
+                        && diffUpdate > -horizontalAngle) {
                     target.animate().x(width / 2 + offset).y(20).setDuration(30).start();
                     target.setVisibility(View.VISIBLE);
                 } else {
@@ -144,10 +146,10 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 distancetext.setText(distance_string);
                 Log.d("direction", String.valueOf(azimuth));
                 Log.d("thing", String.valueOf(diff));
-                if (diff > 18 && left.getVisibility() == View.VISIBLE) {
+                if (diff.getValue() > 18 && left.getVisibility() == View.VISIBLE) {
                     Log.d("thing", "LEFT LEFT LEFT");
                     right.setImageResource(R.drawable.brandon_left);
-                } else if (diff < -18 && right.getVisibility() == View.VISIBLE) {
+                } else if (diff.getValue() < -18 && right.getVisibility() == View.VISIBLE) {
                     Log.d("thing", "RIGHT RIGHT RIGHT");
                     right.setImageResource(R.drawable.brandon_right);
                 }
@@ -157,7 +159,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 }
 
                 h.postDelayed(this, 75);
-
             }
 
         };
@@ -235,7 +236,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 SensorManager.remapCoordinateSystem(R, SensorManager.AXIS_X, SensorManager.AXIS_Z, correctedR);
                 SensorManager.getOrientation(correctedR, orientation);
                 // at this point, orientation contains the azimuth(direction), pitch and roll values.
-                azimuth = 180 * orientation[0] / Math.PI;
+                azimuth = (float) (180 * orientation[0] / Math.PI);
                 double pitch = 180 * orientation[1] / Math.PI;
                 double roll = 180 * orientation[2] / Math.PI;
             }
