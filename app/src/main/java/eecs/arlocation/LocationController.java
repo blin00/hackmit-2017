@@ -80,7 +80,11 @@ public class LocationController {
     }
 
     private void updateLocation(Location location) {
-        Log.d("ZZZZZ", "updated location " + location);
-        activity.setLocation(location);
+//        Log.d("ZZZZZ", "updated location " + location);
+        if (location == null) {
+            return;
+        }
+        activity.user.updateLocation(location);
+        activity.database.child("users").child(activity.user.name).setValue(activity.user);
     }
 }

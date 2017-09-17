@@ -12,15 +12,21 @@ import com.facebook.AccessToken;
 import com.facebook.CallbackManager;
 import com.facebook.FacebookCallback;
 import com.facebook.FacebookException;
+import com.facebook.GraphRequest;
+import com.facebook.GraphResponse;
 import com.facebook.login.LoginResult;
 import com.facebook.login.widget.LoginButton;
 import com.google.android.gms.tasks.OnCompleteListener;
+import com.google.android.gms.tasks.RuntimeExecutionException;
 import com.google.android.gms.tasks.Task;
 import com.google.firebase.auth.AuthCredential;
 import com.google.firebase.auth.AuthResult;
 import com.google.firebase.auth.FacebookAuthProvider;
 import com.google.firebase.auth.FirebaseAuth;
 import com.google.firebase.auth.FirebaseUser;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 public class LoginActivity extends Activity {
 
@@ -36,7 +42,7 @@ public class LoginActivity extends Activity {
         callbackManager = CallbackManager.Factory.create();
         LoginButton loginButton = (LoginButton) findViewById(R.id.button_facebook_login);
 
-        loginButton.setReadPermissions("email", "public_profile");
+        loginButton.setReadPermissions("email", "public_profile", "user_friends");
         loginButton.registerCallback(callbackManager, new FacebookCallback<LoginResult>() {
             @Override
             public void onSuccess(LoginResult loginResult) {
@@ -95,12 +101,32 @@ public class LoginActivity extends Activity {
     void accessUI() {
         FirebaseUser currentUser = mAuth.getCurrentUser();
         if (currentUser != null) {
-            new Handler().post(new Runnable() {
-                public void run() {
-                    startActivity(new Intent(LoginActivity.this, FullscreenActivity.class));
-                    finish();
-                }
-            });
+            GraphRequest request = GraphRequest.newMeRequest(
+                    AccessToken.getCurrentAccessToken(),
+                    new GraphRequest.GraphJSONObjectCallback() {
+                        @Override
+                        public void onCompleted(
+                                JSONObject object,
+                                GraphResponse response) {
+                            try {
+                                final String name = object.getString("name");
+                                new Handler().post(new Runnable() {
+                                    public void run() {
+                                        startActivity(
+                                                new Intent(LoginActivity.this, FullscreenActivity.class)
+                                                        .putExtra("name", name));
+                                        finish();
+                                    }
+                                });
+                            } catch (JSONException je) {
+                                throw new RuntimeException(je);
+                            }
+                        }
+                    });
+            Bundle parameters = new Bundle();
+            parameters.putString("fields", "name");
+            request.setParameters(parameters);
+            request.executeAsync();
         }
     }
 }

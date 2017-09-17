@@ -30,13 +30,16 @@ import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.util.Size;
 import android.util.SizeF;
-import android.view.MotionEvent;
 import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
-import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.google.firebase.auth.FirebaseAuth;
+import com.google.firebase.auth.FirebaseUser;
+import com.google.firebase.database.DatabaseReference;
+import com.google.firebase.database.FirebaseDatabase;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -56,7 +59,12 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     private Handler mCameraHandler;
     private Size bestSize;
     private LocationController locationController;
+
     private PermissionController permissionController;
+    private FirebaseAuth firebaseAuth;
+    private FirebaseUser currentUser;
+    public DatabaseReference database;
+    public User user;
 
     private CameraCaptureSession previewCaptureSession;
 
@@ -65,9 +73,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     private float verticalAngle = 60;
 
     private float azimuth;
-    private ExpFilter pitch;
 
-    private Location myLocation;
+    private ExpFilter pitch;
 
     private SensorManager mSensorManager;
     private Sensor accelerometer;
@@ -85,8 +92,13 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-
         setContentView(R.layout.activity_fullscreen);
+        user = new User(getIntent().getStringExtra("name"));
+
+        firebaseAuth = FirebaseAuth.getInstance();
+        currentUser = firebaseAuth.getCurrentUser();
+        database = FirebaseDatabase.getInstance().getReference();
+
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
@@ -189,6 +201,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     @Override
     protected void onDestroy() {
         super.onDestroy();
+        database.child("users").child(user.name).removeValue();
         mCameraHandlerThread.quit();
         if (mCameraDevice != null) {
             mCameraDevice.close();
@@ -381,8 +394,20 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         permissionController.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
-    public void setLocation(Location l){
-        myLocation = new Location(l);
-    }
+//    private void queryFB() {
+//        new GraphRequest(
+//                AccessToken.getCurrentAccessToken(),
+//                "/me/friends",
+//                null,
+//                HttpMethod.GET,
+//                new GraphRequest.Callback() {
+//                    public void onCompleted(GraphResponse response) {
+//                        JSONObject object = response.getJSONObject();
+//                        Log.d("ZZZZZ", object.toString());
+//                        Util.makeToast(FullscreenActivity.this, object.toString());
+//                    }
+//                }
+//        ).executeAsync();
+//    }
 }
 
