@@ -33,6 +33,7 @@ import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
 import android.widget.ImageView;
+import android.widget.TextView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -126,22 +127,35 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 source.setLatitude(42.3586);
                 destination.setLongitude(-71.0966);
                 destination.setLatitude(42.3587);
+                float distance = source.distanceTo(destination);
+                Log.d("distance",String.valueOf(distance));
                 float mybear = (float) azimuth;
                 float desirebear = source.bearingTo(destination);
                 float diff = mybear - desirebear;
                 ImageView left = (ImageView) findViewById(R.id.left);
                 ImageView right = (ImageView) findViewById(R.id.right);
+                final TextView helloTextView = (TextView) findViewById(R.id.name_id);
+
+                final TextView distancetext = (TextView) findViewById(R.id.distance_id);
+                String distance_string = String.valueOf(distance) + "meters away";
+
+                distancetext.setText(distance_string);
                 Log.d("direction", String.valueOf(azimuth));
                 //right.setVisibility(View.INVISIBLE);
-                Log.d("diff", String.valueOf(diff));
-                if (diff < 0 && left.getVisibility() == View.VISIBLE) {
+                Log.d("thing", String.valueOf(diff));
+                if (diff < -18 && left.getVisibility() == View.VISIBLE) {
                     Log.d("thing", "RIGHT RIGHT RIGHT");
                     right.setImageResource(R.drawable.ic_right_bold);
                     left.setImageResource(R.drawable.ic_left_gray);
-                } else if (right.getVisibility() == View.VISIBLE) {
+                } else if (diff > 18 && right.getVisibility() == View.VISIBLE) {
                     Log.d("thing", "LEFT LEFT LEFT");
                     right.setImageResource(R.drawable.ic_right_gray);
                     left.setImageResource(R.drawable.ic_left_bold);
+                }
+                else {
+                    Log.d("thing", "CENTER CENTER CENTER");
+                    right.setImageResource(R.drawable.ic_right_gray);
+                    left.setImageResource(R.drawable.ic_left_gray);
                 }
 
                 h.postDelayed(this, 500);
