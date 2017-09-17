@@ -156,19 +156,13 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
 
                     distancetext.setText(distance_string);
                     Log.d(t.name, String.valueOf(azimuth));
-                    Log.d(t.name, String.valueOf(t.exp));
+                    Log.d(t.name, String.valueOf(t.exp.getValue()));
 
                     if (t.exp.getValue() > 18) {
-                        Log.d("thing", "LEFT LEFT LEFT");
-                        //t_dir.setImageResource(R.drawable.brandon_left);
                         t.set_pointer_direction(-1);
                     } else if (t.exp.getValue() < -18) {
-                        Log.d("thing", "RIGHT RIGHT RIGHT");
-                        //t_dir.setImageResource(R.drawable.brandon_right);
                         t.set_pointer_direction(1);
                     } else {
-                        Log.d("thing", "CENTER CENTER CENTER");
-                        //t_dir.setImageResource(R.drawable.brandon_center);
                         t.set_pointer_direction(0);
                     }
                 }
@@ -187,8 +181,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         findViewById(R.id.hamburgermenu).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startActivity(new Intent(FullscreenActivity.this, CircleActivity.class));
-                setupCamera();
-                finish();
             }
         });
         updateHandler.post(updateRunnable);
@@ -248,7 +240,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 SensorManager.remapCoordinateSystem(R, SensorManager.AXIS_X, SensorManager.AXIS_Z, correctedR);
                 SensorManager.getOrientation(correctedR, orientation);
                 // at this point, orientation contains the azimuth(direction), pitch and roll values.
-                azimuth = (float) Math.toDegrees(orientation[0]);
+                azimuth = (float) Math.toDegrees(orientation[0]) - 15;  // -15 is magnetic declination @ MIT
                 pitch.update(Math.toDegrees(orientation[1]));
 //                double roll = 180 * orientation[2] / Math.PI;
             }
@@ -371,6 +363,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     }
 
     private void createCaptureSession(CaptureRequest.Builder captureRequestBuilder, CameraCaptureSession.StateCallback cameraStateCallback, Surface surface) {
+        if (mDisplaySurface == null) return;
         captureRequestBuilder.addTarget(surface);
         List<Surface> outputs = new ArrayList<>();
         outputs.add(surface);
