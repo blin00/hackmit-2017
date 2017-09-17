@@ -56,10 +56,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     private Handler mCameraHandler;
     private Size bestSize;
     private LocationController locationController;
-
-    // arbitrary constants for permissions request
-    public static final int MY_PERMISSIONS_REQUEST_READ_CAMERA = 0;
-    public static final int MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION = 1;
+    private PermissionController permissionController;
 
     private CameraCaptureSession previewCaptureSession;
 
@@ -68,7 +65,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     private float verticalAngle = 60;
 
     private float azimuth;
-    private float pitch;
+    private ExpFilter pitch;
+
     private Location myLocation;
 
     private SensorManager mSensorManager;
@@ -98,19 +96,20 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
             actionBar.hide();
         }
 
+        pitch = new ExpFilter(0.25);
+
         mContentView = (SurfaceView) findViewById(R.id.fullscreen_content);
 
         mCameraHandlerThread = new HandlerThread("CameraThread");
         mCameraHandlerThread.start();
         mCameraHandler = new Handler(mCameraHandlerThread.getLooper());
 
+        final Target brandon = new Target("brandon", new Location("brandon_location"), R.drawable.brandon_left,R.drawable.brandon_right,R.drawable.brandon_center,findViewById(R.id.brandon_target), findViewById(R.id.brandon) );
+        final Target zhongxia = new Target("z", new Location("zhongxia_location"),R.drawable.zhongxia_left,R.drawable.zhongxia_right,R.drawable.zhongxia_center ,findViewById(R.id.zhongxia_target), findViewById(R.id.zhongxia));
+        final Target alex = new Target("alex", new Location("alex_location"), R.drawable.alex_left,R.drawable.alex_right,R.drawable.alex_center ,findViewById(R.id.alex_target), findViewById(R.id.alex));
         updateHandler = new Handler(Looper.getMainLooper());
         updateRunnable = new Runnable() {
             public void run() {
-                Target brandon = new Target("brandon", new Location("brandon_location"), R.drawable.brandon_left,R.drawable.brandon_right,R.drawable.brandon_center,findViewById(R.id.brandon_target), findViewById(R.id.brandon) );
-                Target zhongxia = new Target("z", new Location("zhongxia_location"),R.drawable.zhongxia_left,R.drawable.zhongxia_right,R.drawable.zhongxia_center ,findViewById(R.id.zhongxia_target), findViewById(R.id.zhongxia));
-                Target alex = new Target("alex", new Location("alex_location"), R.drawable.alex_left,R.drawable.alex_right,R.drawable.alex_center ,findViewById(R.id.alex_target), findViewById(R.id.alex));
-
                 zhongxia.setLocation(-91.3019655, 42.1545758);
                 alex.setLocation(-71.0019655, 43.3545758);
                 brandon.setLocation(-71.1019655, 42.3545758);
@@ -121,7 +120,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 targets.add(alex);
 
 
-                Log.d("", "HELLLOOOOOOOO");
                 for (Target t : targets) {
                     Location source = new Location("source");
                     source.setLatitude(42.356);
@@ -139,87 +137,32 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     double x = distance * Math.sin(Math.toRadians(t.exp.getValue()));
                     double y = distance * Math.cos(Math.toRadians(t.exp.getValue()));
                     double z = y * Math.tan(Math.toRadians(horizontalAngle / 2));
-                    int offset_x = -(int) (x / z * width / 2);
-                    double a = distance * Math.sin(Math.toRadians(pitch));
-                    double b = distance * Math.cos(Math.toRadians(pitch));
+                    int offset_x = -(int) Math.round(x / z * width / 2);
+                    double a = distance * Math.sin(Math.toRadians(pitch.getValue()));
+                    double b = distance * Math.cos(Math.toRadians(pitch.getValue()));
                     double c = b * Math.tan(Math.toRadians(verticalAngle / 2));
-                    int offset_y = -(int) (a / c * height / 2);
+                    int offset_y = -(int) Math.round(a / c * height / 2);
                     View target = t.plumbbob;
-                    // check that filtered angle is inside horizontal FOV
-                    // and unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
-                    if (t.exp.getValue() < horizontalAngle / 2
-                            && t.exp.getValue() > -horizontalAngle / 2
-                            && diffRaw < horizontalAngle
-                            && diffRaw > -horizontalAngle) {
+                    // check unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
+                    if (diffRaw < horizontalAngle && diffRaw > -horizontalAngle) {
                         target.animate().x(width / 2 + offset_x).y(height / 2 + offset_y).setDuration(30).start();
                         target.setVisibility(View.VISIBLE);
                     } else {
                         target.setVisibility(View.GONE);
                     }
-/*
-                    Location destination = new Location("brandon_destination"); //replace
-                    Location source = myLocation;
-                    source.setLatitude(42.356);
-                    source.setLongitude(-71.102);
-                    destination.setLongitude(-71.1019655);
-                    destination.setLatitude(42.3545758);
-                    float distance = source.distanceTo(destination);
-                    float mybear = azimuth;
-                    float desirebear = source.bearingTo(destination);
-                    float diffRaw = mybear - desirebear;
-                    if (diffRaw < -180) diffRaw += 360;
-                    if (diffRaw >= 180) diffRaw -= 360;
-                    diff.update(diffRaw);
-                    int width = mContentView.getWidth();
-                    int height = mContentView.getHeight();
-                    double x = distance * Math.sin(Math.toRadians(diff.getValue()));
-                    double y = distance * Math.cos(Math.toRadians(diff.getValue()));
-                    double z = y * Math.tan(Math.toRadians(horizontalAngle / 2));
-                    int offset_x = -(int) (x / z * width / 2);
-                    double a = distance * Math.sin(Math.toRadians(pitch));
-                    double b = distance * Math.cos(Math.toRadians(pitch));
-                    double c = b * Math.tan(Math.toRadians(verticalAngle / 2));
-                    int offset_y = -(int) (a / c * height / 2);
-                    View target = findViewById(R.id.target);
-                    // check that filtered angle is inside horizontal FOV
-                    // and unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
-                    if (diff.getValue() < horizontalAngle / 2
-                            && diff.getValue() > -horizontalAngle / 2
-                            && diffRaw < horizontalAngle
-                            && diffRaw > -horizontalAngle) {
-                        target.animate().x(width / 2 + offset_x).y(height / 2 + offset_y).setDuration(30).start();
-                        target.setVisibility(View.VISIBLE);
-                    } else {
-                        target.setVisibility(View.GONE);
-                    }
-                    ImageView brandon = (ImageView) findViewById(R.id.brandon);*/
-                    //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
-
-
-                    //at the end, we need:
-                    // new image of plumbbob
-                    // new image of direction to go
-                    // update the location
-                    //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
 
                     final TextView distancetext = (TextView) findViewById(R.id.distance_id);
                     String distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
 
                     distancetext.setText(distance_string);
                     Log.d(t.name, String.valueOf(azimuth));
-                    Log.d(t.name, String.valueOf(t.exp));
+                    Log.d(t.name, String.valueOf(t.exp.getValue()));
 
                     if (t.exp.getValue() > 18) {
-                        Log.d("thing", "LEFT LEFT LEFT");
-                        //t_dir.setImageResource(R.drawable.brandon_left);
                         t.set_pointer_direction(-1);
                     } else if (t.exp.getValue() < -18) {
-                        Log.d("thing", "RIGHT RIGHT RIGHT");
-                        //t_dir.setImageResource(R.drawable.brandon_right);
                         t.set_pointer_direction(1);
                     } else {
-                        Log.d("thing", "CENTER CENTER CENTER");
-                        //t_dir.setImageResource(R.drawable.brandon_center);
                         t.set_pointer_direction(0);
                     }
                 }
@@ -228,15 +171,19 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
             }
         };
         locationController = new LocationController(this);
-        setupCamera();
+        permissionController = new PermissionController(this);
+        permissionController.getAllPermissions();
+    }
 
+    public void doneWithPermissions() {
+        setupCamera();
+        locationController.setupLocation();
         findViewById(R.id.hamburgermenu).setOnClickListener(new View.OnClickListener() {
             public void onClick(View v) {
                 startActivity(new Intent(FullscreenActivity.this, CircleActivity.class));
-                finishSetupCamera();
-                finish();
             }
         });
+        updateHandler.post(updateRunnable);
     }
 
     @Override
@@ -271,19 +218,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         mSensorManager.unregisterListener(this, magnetometer);
     }
 
-    private void setupCamera() {
-        if (ContextCompat.checkSelfPermission(this, Manifest.permission.CAMERA)
-                != PackageManager.PERMISSION_GRANTED) {
-            Log.d("AR", "requesting camera perms");
-            ActivityCompat.requestPermissions(this,
-                    new String[]{Manifest.permission.CAMERA},
-                    MY_PERMISSIONS_REQUEST_READ_CAMERA);
-        } else {
-            Log.d("AR", "already have camera perms");
-            finishSetupCamera();
-        }
-    }
-
     @Override
     public void onSensorChanged(SensorEvent event) {
         // onSensorChanged gets called for each sensor so we have to remember the values
@@ -306,15 +240,15 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 SensorManager.remapCoordinateSystem(R, SensorManager.AXIS_X, SensorManager.AXIS_Z, correctedR);
                 SensorManager.getOrientation(correctedR, orientation);
                 // at this point, orientation contains the azimuth(direction), pitch and roll values.
-                azimuth = (float) (180 * orientation[0] / Math.PI);
-                pitch = (float) (180 * orientation[1] / Math.PI);
+                azimuth = (float) Math.toDegrees(orientation[0]) - 15;  // -15 is magnetic declination @ MIT
+                pitch.update(Math.toDegrees(orientation[1]));
 //                double roll = 180 * orientation[2] / Math.PI;
             }
         }
     }
 
     @SuppressWarnings({"MissingPermission"})
-    private void finishSetupCamera() {
+    private void setupCamera() {
         CameraManager cameraManager = (CameraManager) getSystemService(Context.CAMERA_SERVICE);
         try {
             String[] idList = cameraManager.getCameraIdList();
@@ -395,9 +329,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
-        if (locationController.checkPermission()) {
-            updateHandler.post(updateRunnable);
-        }
     }
 
     private void startPreview() {
@@ -432,6 +363,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     }
 
     private void createCaptureSession(CaptureRequest.Builder captureRequestBuilder, CameraCaptureSession.StateCallback cameraStateCallback, Surface surface) {
+        if (mDisplaySurface == null) return;
         captureRequestBuilder.addTarget(surface);
         List<Surface> outputs = new ArrayList<>();
         outputs.add(surface);
@@ -446,21 +378,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     public void onRequestPermissionsResult(int requestCode,
                                            String permissions[],
                                            int[] grantResults) {
-        if (requestCode == MY_PERMISSIONS_REQUEST_READ_CAMERA) {
-            if (grantResults.length > 0
-                    && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
-                Log.d("AR", "camera perms success");
-                finishSetupCamera();
-            } else {
-                // try again
-                Log.d("AR", "camera perms retry");
-                setupCamera();
-            }
-        } else if (requestCode == MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
-            if (locationController.checkPermission()) {
-                updateHandler.post(updateRunnable);
-            }
-        }
+        permissionController.onRequestPermissionsResult(requestCode, permissions, grantResults);
     }
 
     public void setLocation(Location l){
