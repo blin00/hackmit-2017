@@ -143,11 +143,11 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 Log.d("direction", String.valueOf(azimuth));
                 //right.setVisibility(View.INVISIBLE);
                 Log.d("thing", String.valueOf(diff));
-                if (diff < -18 && left.getVisibility() == View.VISIBLE) {
+                if (diff > 18 && left.getVisibility() == View.VISIBLE) {
                     Log.d("thing", "RIGHT RIGHT RIGHT");
                     right.setImageResource(R.drawable.ic_right_bold);
                     left.setImageResource(R.drawable.ic_left_gray);
-                } else if (diff > 18 && right.getVisibility() == View.VISIBLE) {
+                } else if (diff < -18 && right.getVisibility() == View.VISIBLE) {
                     Log.d("thing", "LEFT LEFT LEFT");
                     right.setImageResource(R.drawable.ic_right_gray);
                     left.setImageResource(R.drawable.ic_left_bold);
