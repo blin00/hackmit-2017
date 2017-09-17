@@ -39,6 +39,7 @@ public class SplashActivity extends Activity {
                 finish();
             }
         }, secondsDelayed * 1000);
-    }
+
+    
 
 }

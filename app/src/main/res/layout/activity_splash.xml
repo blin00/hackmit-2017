@@ -1,4 +1,4 @@
-<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:baselineAligned="false"
@@ -7,8 +7,13 @@
     <ImageView
         android:layout_width="468dp"
         android:layout_height="609dp"
-        android:src = "@drawable/splash_screen"
+        android:src = "@drawable/splash_screen_background"
         android:layout_gravity="center"/>
 
+    <ImageView
+        android:layout_width="70dp"
+        android:layout_height="150dp"
+        android:src = "@drawable/logo"
+        android:layout_gravity="center"/>
 
-</LinearLayout>
+</FrameLayout>
