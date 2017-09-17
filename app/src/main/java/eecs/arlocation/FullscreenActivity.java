@@ -127,7 +127,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 //Util.makeToast(FullscreenActivity.this, source.toString());
                 destination.setLongitude(-71.0966);
                 destination.setLatitude(42.3587);
-                float distance = source.distanceTo(destination);
+                int distance = Math.round(source.distanceTo(destination));
                 Log.d("distance",String.valueOf(distance));
                 float mybear = (float) azimuth;
                 float desirebear = source.bearingTo(destination);
@@ -137,7 +137,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 final TextView helloTextView = (TextView) findViewById(R.id.name_id);
 
                 final TextView distancetext = (TextView) findViewById(R.id.distance_id);
-                String distance_string = String.valueOf(distance) + "meters away";
+                String distance_string = String.valueOf(distance) + " meters away";
 
                 distancetext.setText(distance_string);
                 Log.d("direction", String.valueOf(azimuth));

@@ -42,36 +42,46 @@
         app:srcCompat="@drawable/ic_left_gray" />
 
     <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
         android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <TextView
-            android:id="@+id/name_id"
-            android:layout_height="wrap_content"
+        android:layout_height="match_parent"
+        android:layout_gravity="bottom"
+        android:orientation="horizontal">
+
+        <ImageView
+            android:id="@+id/plumbob"
+            android:layout_width="25dp"
+            android:layout_height="100dp"
+            android:layout_gravity="bottom"
+            android:layout_marginBottom="40dp"
+            android:layout_marginLeft="130dp"
+            app:srcCompat="@drawable/plumbob" />
+
+        <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
             android:layout_width="match_parent"
-            android:text="Alex Chen"
-            android:layout_gravity="center|bottom"
-            android:textAlignment="center"
-            android:layout_marginBottom="45dp"
-            android:textSize="25dp"
-            android:textColor="#ffffff"
-            />
-    </LinearLayout>
-    <LinearLayout
-        xmlns:android="http://schemas.android.com/apk/res/android"
-        android:layout_width="match_parent"
-        android:layout_height="match_parent">
-        <TextView
-            android:id="@+id/distance_id"
             android:layout_height="wrap_content"
-            android:layout_width="match_parent"
-            android:text="20 meters away"
-            android:layout_gravity="center|bottom"
-            android:textAlignment="center"
-            android:layout_marginBottom="30dp"
-            android:textSize="18dp"
-            android:textColor="#ffffff"
-            />
+            android:orientation="vertical"
+            android:layout_marginBottom="70dp"
+            android:layout_marginRight="100dp"
+            android:layout_gravity="center|bottom">
+
+            <TextView
+                android:id="@+id/name_id"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="Alex Chen"
+                android:textAlignment="center"
+                android:textColor="#ffffff"
+                android:textSize="18dp" />
+
+            <TextView
+                android:id="@+id/distance_id"
+                android:layout_width="100dp"
+                android:layout_height="wrap_content"
+                android:text="20 meters away"
+                android:textAlignment="center"
+                android:textColor="#ffffff"
+                android:textSize="12dp" />
+        </LinearLayout>
     </LinearLayout>
 </FrameLayout>
 
