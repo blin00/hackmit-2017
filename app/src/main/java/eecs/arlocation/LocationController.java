@@ -66,12 +66,16 @@ public class LocationController {
         this.activity = activity;
     }
 
-    public void checkPermission() {
-        if (ContextCompat.checkSelfPermission(activity, android.Manifest.permission.ACCESS_FINE_LOCATION ) == PackageManager.PERMISSION_GRANTED) {
+    public boolean checkPermission() {
+        if (ContextCompat.checkSelfPermission(activity, android.Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED) {
+            Log.d("AR", "location perms success");
             setupLocation();
+            return true;
         } else {
+            Log.d("AR", "location perms retry");
             ActivityCompat.requestPermissions(activity, new String[]{Manifest.permission.ACCESS_FINE_LOCATION},
                     FullscreenActivity.MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION);
+            return false;
         }
     }
 
