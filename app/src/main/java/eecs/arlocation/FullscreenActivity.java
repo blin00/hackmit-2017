@@ -41,6 +41,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static android.hardware.camera2.CameraMetadata.LENS_FACING_BACK;
+import static eecs.arlocation.Util.minf;
 
 /**
  * An example full-screen activity that shows and hides the system UI (i.e.
@@ -272,7 +273,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     float w = 0.5f * sensorSize.getWidth();
                     float h = 0.5f * sensorSize.getHeight();
                     Log.d("AR", "sensorSize = " + 2 * w + ", " + 2 * h);
-                    float focalLength = focalLengths[focalLengths.length - 1];
+                    float focalLength = minf(focalLengths);
                     horizontalAngle = (float) Math.toDegrees(2 * Math.atan(w / focalLength));
 //                    float verticalAngle = (float) Math.toDegrees(2 * Math.atan(h / focalLength));
                     Log.d("AR", "using first focalLength = " + focalLength + "mm");
