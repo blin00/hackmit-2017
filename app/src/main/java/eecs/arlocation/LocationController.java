@@ -18,7 +18,7 @@ import android.widget.Toast;
 
 public class LocationController {
     private static final int MIN_TIME_REQUEST = 1000;
-    private final Activity activity;
+    private final FullscreenActivity activity;
 
     private LocationManager locationManager;
 
@@ -62,7 +62,7 @@ public class LocationController {
         }
     };
 
-    public LocationController(Activity activity) {
+    public LocationController(FullscreenActivity activity) {
         this.activity = activity;
     }
 
@@ -91,6 +91,7 @@ public class LocationController {
 
     private void updateLocation(Location location) {
         Log.d("ZZZZZ", "updated location " + location);
+        activity.setLocation(location);
         Util.makeToast(activity, "updated location");
     }
 

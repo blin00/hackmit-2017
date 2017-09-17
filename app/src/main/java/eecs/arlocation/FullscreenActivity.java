@@ -78,6 +78,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     public static float swPitch;
     public static float swAzimuth;
     public static double azimuth;
+    public static Location myLocation;
 
     public static SensorManager mSensorManager;
     public static Sensor accelerometer;
@@ -122,9 +123,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         final Runnable r = new Runnable() {
             public void run() {
                 Location destination = new Location("destination"); //replace
-                Location source = new Location("source"); //replace
-                source.setLongitude(-71.096);
-                source.setLatitude(42.3586);
+                Location source = myLocation;
+                //Util.makeToast(FullscreenActivity.this, source.toString());
                 destination.setLongitude(-71.0966);
                 destination.setLatitude(42.3587);
                 float distance = source.distanceTo(destination);
@@ -363,6 +363,10 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         } else if (requestCode == MY_PERMISSIONS_REQUEST_ACCESS_FINE_LOCATION) {
             locationController.checkPermission();
         }
+    }
+
+    public void setLocation(Location l){
+        myLocation = new Location(l);
     }
 }
 
