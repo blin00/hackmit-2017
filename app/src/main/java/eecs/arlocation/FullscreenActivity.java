@@ -66,7 +66,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     private float horizontalAngle = 60;
 
     private float azimuth;
-    private ExpFilter diff;
     private Location myLocation;
 
     private SensorManager mSensorManager;
@@ -88,8 +87,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         accelerometer = mSensorManager.getDefaultSensor(Sensor.TYPE_ACCELEROMETER);
         magnetometer = mSensorManager.getDefaultSensor(Sensor.TYPE_MAGNETIC_FIELD);
         mContentView = (SurfaceView) findViewById(R.id.fullscreen_content);
-        diff = new ExpFilter(0.25);
-
         ActionBar actionBar = getSupportActionBar();
         if (actionBar != null) {
             actionBar.hide();
@@ -105,59 +102,80 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         final Handler h = new Handler(Looper.getMainLooper());
         final Runnable r = new Runnable() {
             public void run() {
-                Location destination = new Location("brandon_destination"); //replace
-                Location source = myLocation;
-                source.setLatitude(42.356);
-                source.setLongitude(-71.102);
-                destination.setLongitude(-71.1019655);
-                destination.setLatitude(42.3545758);
-                float distance = source.distanceTo(destination);
-                float mybear = azimuth;
-                float desirebear = source.bearingTo(destination);
-                float diffRaw = mybear - desirebear;
-                if (diffRaw < -180) diffRaw += 360;
-                if (diffRaw >= 180) diffRaw -= 360;
-                diff.update(diffRaw);
-                int width = mContentView.getWidth();
-                int height = mContentView.getHeight();
-                double x = distance * Math.sin(Math.toRadians(diff.getValue()));
-                double y = distance * Math.cos(Math.toRadians(diff.getValue()));
-                double z = y * Math.tan(Math.toRadians(horizontalAngle / 2));
-                int offset = -(int) (x / z * width / 2);
-                View target = findViewById(R.id.target);
-                // check that filtered angle is inside horizontal FOV
-                // and unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
-                if (diff.getValue() < horizontalAngle / 2
-                        && diff.getValue() > -horizontalAngle / 2
-                        && diffRaw < horizontalAngle
-                        && diffRaw > -horizontalAngle) {
-                    target.animate().x(width / 2 + offset).y(20).setDuration(30).start();
-                    target.setVisibility(View.VISIBLE);
-                } else {
-                    target.setVisibility(View.GONE);
-                }
-                ImageView brandon = (ImageView) findViewById(R.id.brandon);
-                //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
+                Target brandon = new Target("brandon", new Location("brandon_location"), R.drawable.brandon_left,R.drawable.brandon_right,R.drawable.brandon_center,findViewById(R.id.brandon_target), findViewById(R.id.brandon) );
+                Target zhongxia = new Target("z", new Location("zhongxia_location"),R.drawable.zhongxia_left,R.drawable.zhongxia_right,R.drawable.zhongxia_center ,findViewById(R.id.zhongxia_target), findViewById(R.id.zhongxia));
+                Target alex = new Target("alex", new Location("alex_location"), R.drawable.alex_left,R.drawable.alex_right,R.drawable.alex_center ,findViewById(R.id.alex_target), findViewById(R.id.alex));
 
-                final TextView distancetext = (TextView) findViewById(R.id.distance_id);
-                String distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
+                zhongxia.setLocation(-91.3019655, 42.1545758);
+                alex.setLocation(-71.0019655, 43.3545758);
+                brandon.setLocation(-71.1019655, 42.3545758);
 
-                distancetext.setText(distance_string);
-                Log.d("direction", String.valueOf(azimuth));
-                Log.d("thing", String.valueOf(diff));
-                Util.makeToast(FullscreenActivity.this, Double.toString(diff.getValue()));
-                if (diff.getValue() > 18) {
-                    Log.d("thing", "LEFT LEFT LEFT");
-                    brandon.setImageResource(R.drawable.brandon_left);
-                } else if (diff.getValue() < -18) {
-                    Log.d("thing", "RIGHT RIGHT RIGHT");
-                    brandon.setImageResource(R.drawable.brandon_right);
-                }
-                else {
-                    Log.d("thing", "CENTER CENTER CENTER");
-                    brandon.setImageResource(R.drawable.brandon_center);
-                }
+                ArrayList<Target> targets = new ArrayList<Target>();
+                targets.add(brandon);
+                targets.add(zhongxia);
+                targets.add(alex);
 
+
+                for (Target t : targets) {
+                    Location source = new Location("source");
+                    source.setLatitude(42.356);
+                    source.setLongitude(-71.102);
+
+                    float distance = source.distanceTo(t.getLocation());
+                    float mybear = azimuth;
+                    float desirebear = source.bearingTo(t.getLocation());
+                    float diffRaw = mybear - desirebear;
+                    if (diffRaw < -180) diffRaw += 360;
+                    if (diffRaw >= 180) diffRaw -= 360;
+                    t.exp.update(diffRaw);
+                    int width = mContentView.getWidth();
+                    int height = mContentView.getHeight();
+                    double x = distance * Math.sin(Math.toRadians(t.exp.getValue()));
+                    double y = distance * Math.cos(Math.toRadians(t.exp.getValue()));
+                    double z = y * Math.tan(Math.toRadians(horizontalAngle / 2));
+                    int offset = -(int) (x / z * width / 2);
+                    View target = t.plumbbob;
+                    // check that filtered angle is inside horizontal FOV
+                    // and unfiltered angle is inside 2 * FOV to avoid spazz at exactly 180 away
+                    if (t.exp.getValue() < horizontalAngle / 2
+                            && t.exp.getValue() > -horizontalAngle / 2
+                            && diffRaw < horizontalAngle
+                            && diffRaw > -horizontalAngle) {
+                        target.animate().x(width / 2 + offset).y(20).setDuration(30).start();
+                        target.setVisibility(View.VISIBLE);
+                    } else {
+                        target.setVisibility(View.GONE);
+                    }
+
+
+                    //at the end, we need:
+                    // new image of plumbbob
+                    // new image of direction to go
+                    // update the location
+                    //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
+
+                    final TextView distancetext = (TextView) findViewById(R.id.distance_id);
+                    String distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
+
+                    distancetext.setText(distance_string);
+                    Log.d(t.name, String.valueOf(azimuth));
+                    Log.d(t.name, String.valueOf(t.exp));
+
+                    if (t.exp.getValue() > 18) {
+                        Log.d("thing", "LEFT LEFT LEFT");
+                        //t_dir.setImageResource(R.drawable.brandon_left);
+                        t.set_pointer_direction(-1);
+                    } else if (t.exp.getValue() < -18) {
+                        Log.d("thing", "RIGHT RIGHT RIGHT");
+                        //t_dir.setImageResource(R.drawable.brandon_right);
+                        t.set_pointer_direction(1);
+                    } else {
+                        Log.d("thing", "CENTER CENTER CENTER");
+                        //t_dir.setImageResource(R.drawable.brandon_center);
+                        t.set_pointer_direction(0);
+                    }
+                }
+                    /*
                 ImageView alex = (ImageView) findViewById(R.id.alex);
                 //final TextView helloTextView = (TextView) findViewById(R.id.name_id);
 
@@ -199,7 +217,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     Log.d("thing", "CENTER CENTER CENTER");
                     zhongxia.setImageResource(R.drawable.zhongxia_center);
                 }
-
+*/
                 h.postDelayed(this, 75);
             }
 

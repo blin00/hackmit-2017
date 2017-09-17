@@ -82,7 +82,6 @@ public class LocationController {
                     MIN_TIME_REQUEST, 1.0f, locationListener);
             updateLocation(locationManager.getLastKnownLocation(LocationManager.GPS_PROVIDER));
         } else {
-            Util.makeToast(activity, "Turn on GPS plz");
             Intent settingsIntent = new Intent(android.provider.Settings.ACTION_LOCATION_SOURCE_SETTINGS);
             settingsIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK);
             activity.startActivity(settingsIntent);
@@ -92,7 +91,6 @@ public class LocationController {
     private void updateLocation(Location location) {
         Log.d("ZZZZZ", "updated location " + location);
         activity.setLocation(location);
-        Util.makeToast(activity, "updated location");
     }
 
 }
