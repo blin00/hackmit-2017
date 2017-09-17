@@ -38,6 +38,7 @@ import android.view.Surface;
 import android.view.SurfaceHolder;
 import android.view.SurfaceView;
 import android.view.View;
+import android.widget.ImageView;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,20 +136,22 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 float mybear = (float) azimuth;
                 float desirebear = source.bearingTo(destination);
                 float diff = mybear - desirebear;
-                View left = findViewById(R.id.left);
-                View right = findViewById(R.id.right);
+                ImageView left = (ImageView) findViewById(R.id.left);
+                ImageView right = (ImageView) findViewById(R.id.right);
                 Log.d("direction", String.valueOf(azimuth));
                 //right.setVisibility(View.INVISIBLE);
                 Log.d("diff", String.valueOf(diff));
-                if (diff < 0) {
-                    right.setVisibility(View.VISIBLE);
-                    left.setVisibility(View.INVISIBLE);
-                } else {
-                    left.setVisibility(View.VISIBLE);
-                    right.setVisibility(View.INVISIBLE);
+                if (diff < 0 && left.getVisibility() == View.VISIBLE) {
+                    Log.d("thing", "RIGHT RIGHT RIGHT");
+                    right.setImageResource(R.drawable.ic_right_bold);
+                    left.setImageResource(R.drawable.ic_left_gray);
+                } else if (right.getVisibility() == View.VISIBLE) {
+                    Log.d("thing", "LEFT LEFT LEFT");
+                    right.setImageResource(R.drawable.ic_right_gray);
+                    left.setImageResource(R.drawable.ic_left_bold);
                 }
 
-                h.postDelayed(this, 300);
+                h.postDelayed(this, 500);
 
             }
 
