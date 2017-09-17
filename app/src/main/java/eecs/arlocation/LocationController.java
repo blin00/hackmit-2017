@@ -96,5 +96,4 @@ public class LocationController {
         Log.d("ZZZZZ", "updated location " + location);
         activity.setLocation(location);
     }
-
 }

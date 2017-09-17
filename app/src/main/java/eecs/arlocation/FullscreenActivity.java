@@ -386,6 +386,9 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         } catch (CameraAccessException e) {
             e.printStackTrace();
         }
+        if (locationController.checkPermission()) {
+            updateHandler.post(updateRunnable);
+        }
     }
 
     private void startPreview() {
@@ -439,7 +442,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d("AR", "camera perms success");
                 finishSetupCamera();
-                locationController.checkPermission();
             } else {
                 // try again
                 Log.d("AR", "camera perms retry");
