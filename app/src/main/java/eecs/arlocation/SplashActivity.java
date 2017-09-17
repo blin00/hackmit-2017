@@ -15,7 +15,7 @@ import android.view.WindowManager;
  * Created by chennosaurus on 9/16/17.
  */
 
-public class SplashActivity extends AppCompatActivity {
+public class SplashActivity extends Activity {
     private View mContentView;
 
     @Override

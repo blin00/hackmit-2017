@@ -46,25 +46,7 @@ import static android.hardware.camera2.CameraMetadata.LENS_FACING_BACK;
  * An example full-screen activity that shows and hides the system UI (i.e.
  * status bar and navigation/system bar) with user interaction.
  */
-public class FullscreenActivity extends AppCompatActivity implements SensorEventListener{
-    /**
-     * Whether or not the system UI should be auto-hidden after
-     * {@link #AUTO_HIDE_DELAY_MILLIS} milliseconds.
-     */
-    private static final boolean AUTO_HIDE = true;
-
-    /**
-     * If {@link #AUTO_HIDE} is set, the number of milliseconds to wait after
-     * user interaction before hiding the system UI.
-     */
-    private static final int AUTO_HIDE_DELAY_MILLIS = 3000;
-
-    /**
-     * Some older devices needs a small delay between UI widget updates
-     * and a change of the status and navigation bar.
-     */
-    private static final int UI_ANIMATION_DELAY = 300;
-    private final Handler mHideHandler = new Handler();
+public class FullscreenActivity extends AppCompatActivity implements SensorEventListener {
     private SurfaceView mContentView;
     private CameraDevice mCameraDevice;
     private Surface mDisplaySurface;
@@ -82,18 +64,15 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
     // hardcode temp value to be overridden later
     private float horizontalAngle = 60;
 
-    public static float swRoll;
-    public static float swPitch;
-    public static float swAzimuth;
-    public static double azimuth;
-    public static Location myLocation;
+    private double azimuth;
+    private Location myLocation;
 
-    public static SensorManager mSensorManager;
-    public static Sensor accelerometer;
-    public static Sensor magnetometer;
+    private SensorManager mSensorManager;
+    private Sensor accelerometer;
+    private Sensor magnetometer;
 
-    public static float[] mAccelerometer = null;
-    public static float[] mGeomagnetic = null;
+    private float[] mAccelerometer = null;
+    private float[] mGeomagnetic = null;
 
     public void onAccuracyChanged(Sensor sensor, int accuracy) {
     }
@@ -126,23 +105,32 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
             public void run() {
                 Location destination = new Location("destination"); //replace
                 Location source = myLocation;
-                //Util.makeToast(FullscreenActivity.this, source.toString());
+                source.setLatitude(42.356);
+                source.setLongitude(-71.102);
                 destination.setLongitude(-71.1019655);
                 destination.setLatitude(42.3545758);
-                int distance = Math.round(source.distanceTo(destination));
+                float distance = source.distanceTo(destination);
                 Log.d("distance",String.valueOf(distance));
                 float mybear = (float) azimuth;
                 float desirebear = source.bearingTo(destination);
                 float diff = mybear - desirebear;
+                if (diff < -180) diff += 360;
+                if (diff >= 180) diff -= 360;
+                Log.i("AR", "me: " + mybear);
+                Log.i("AR", "desired: " + desirebear);
+                Log.i("AR", "diff: " + diff);
                 int width = mContentView.getWidth();
                 int height = mContentView.getHeight();
                 double x = distance * Math.sin(diff * Math.PI / 180);
                 double y = distance * Math.cos(diff * Math.PI / 180);
                 double z = y * Math.tan(horizontalAngle / 2);
-                int offset = (int) (x / z * width / 2);
+                int offset = -(int) (x / z * width / 2);
+                Log.i("AR", "offset: " + offset);
+                Log.i("AR", "alpha: " + horizontalAngle);
                 View target = findViewById(R.id.target);
-                if (diff < horizontalAngle / 2 || diff > -horizontalAngle / 2) {
-                    target.animate().x(width / 2 + offset).y(10).setDuration(0).start();
+                if (diff < horizontalAngle / 2 && diff > -horizontalAngle / 2) {
+                    target.animate().x(width / 2 + offset).y(20).setDuration(30).start();
+                    target.setVisibility(View.VISIBLE);
                 } else {
                     target.setVisibility(View.GONE);
                 }
@@ -151,11 +139,10 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 final TextView helloTextView = (TextView) findViewById(R.id.name_id);
 
                 final TextView distancetext = (TextView) findViewById(R.id.distance_id);
-                String distance_string = String.valueOf(distance) + " meters away";
+                String distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
 
                 distancetext.setText(distance_string);
                 Log.d("direction", String.valueOf(azimuth));
-                //right.setVisibility(View.INVISIBLE);
                 Log.d("thing", String.valueOf(diff));
                 if (diff > 18 && left.getVisibility() == View.VISIBLE) {
                     Log.d("thing", "LEFT LEFT LEFT");
@@ -169,7 +156,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     right.setImageResource(R.drawable.brandon_center);
                 }
 
-                h.postDelayed(this, 500);
+                h.postDelayed(this, 75);
 
             }
 
@@ -244,7 +231,9 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
 
             if (success) {
                 float orientation[] = new float[3];
-                SensorManager.getOrientation(R, orientation);
+                float correctedR[] = new float[9];
+                SensorManager.remapCoordinateSystem(R, SensorManager.AXIS_X, SensorManager.AXIS_Z, correctedR);
+                SensorManager.getOrientation(correctedR, orientation);
                 // at this point, orientation contains the azimuth(direction), pitch and roll values.
                 azimuth = 180 * orientation[0] / Math.PI;
                 double pitch = 180 * orientation[1] / Math.PI;
