@@ -129,20 +129,28 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 //Util.makeToast(FullscreenActivity.this, source.toString());
                 destination.setLongitude(-71.1019655);
                 destination.setLatitude(42.3545758);
-                int distance = Math.round(source.distanceTo(destination));
+                float distance = source.distanceTo(destination);
                 Log.d("distance",String.valueOf(distance));
                 float mybear = (float) azimuth;
                 float desirebear = source.bearingTo(destination);
                 float diff = mybear - desirebear;
+                if (diff < -180) diff += 360;
+                if (diff >= 180) diff -= 360;
+                Log.i("AR", "me: " + mybear);
+                Log.i("AR", "desired: " + desirebear);
+                Log.i("AR", "diff: " + diff);
                 int width = mContentView.getWidth();
                 int height = mContentView.getHeight();
                 double x = distance * Math.sin(diff * Math.PI / 180);
                 double y = distance * Math.cos(diff * Math.PI / 180);
                 double z = y * Math.tan(horizontalAngle / 2);
-                int offset = (int) (x / z * width / 2);
+                int offset = -(int) (x / z * width / 2);
+                Log.i("AR", "offset: " + offset);
+                Log.i("AR", "alpha: " + horizontalAngle);
                 View target = findViewById(R.id.target);
-                if (diff < horizontalAngle / 2 || diff > -horizontalAngle / 2) {
-                    target.animate().x(width / 2 + offset).y(10).setDuration(0).start();
+                if (diff < horizontalAngle / 2 && diff > -horizontalAngle / 2) {
+                    target.animate().x(width / 2 + offset).y(20).setDuration(30).start();
+                    target.setVisibility(View.VISIBLE);
                 } else {
                     target.setVisibility(View.GONE);
                 }
@@ -151,11 +159,10 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                 final TextView helloTextView = (TextView) findViewById(R.id.name_id);
 
                 final TextView distancetext = (TextView) findViewById(R.id.distance_id);
-                String distance_string = String.valueOf(distance) + " meters away";
+                String distance_string = String.valueOf((int) Math.round(distance)) + " meters away";
 
                 distancetext.setText(distance_string);
                 Log.d("direction", String.valueOf(azimuth));
-                //right.setVisibility(View.INVISIBLE);
                 Log.d("thing", String.valueOf(diff));
                 if (diff > 18 && left.getVisibility() == View.VISIBLE) {
                     Log.d("thing", "LEFT LEFT LEFT");
@@ -172,7 +179,7 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                     left.setImageResource(R.drawable.ic_left_gray);
                 }
 
-                h.postDelayed(this, 500);
+                h.postDelayed(this, 75);
 
             }
 
@@ -247,7 +254,9 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
 
             if (success) {
                 float orientation[] = new float[3];
-                SensorManager.getOrientation(R, orientation);
+                float correctedR[] = new float[9];
+                SensorManager.remapCoordinateSystem(R, SensorManager.AXIS_X, SensorManager.AXIS_Z, correctedR);
+                SensorManager.getOrientation(correctedR, orientation);
                 // at this point, orientation contains the azimuth(direction), pitch and roll values.
                 azimuth = 180 * orientation[0] / Math.PI;
                 double pitch = 180 * orientation[1] / Math.PI;
