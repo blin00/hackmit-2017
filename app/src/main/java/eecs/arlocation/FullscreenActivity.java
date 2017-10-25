@@ -69,7 +69,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
 
     private PermissionController permissionController;
     private FirebaseAuth firebaseAuth;
-    private FirebaseUser currentUser;
     public DatabaseReference database;
     public User user;
     private HashMap<String, Target> targets;
@@ -101,14 +100,10 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_fullscreen);
         user = new User(getIntent().getStringExtra("name"));
-        final Target brandon = new Target("Brandon Lin", new Location("brandon_location"), R.drawable.brandon_left,R.drawable.brandon_right,R.drawable.brandon_center,findViewById(R.id.brandon_target), findViewById(R.id.brandon) );
-        final Target zhongxia = new Target("Zhongxia Yan", new Location("zhongxia_location"),R.drawable.zhongxia_left,R.drawable.zhongxia_right,R.drawable.zhongxia_center ,findViewById(R.id.zhongxia_target), findViewById(R.id.zhongxia));
-        final Target alex = new Target("Alex Chen", new Location("alex_location"), R.drawable.alex_left,R.drawable.alex_right,R.drawable.alex_center ,findViewById(R.id.alex_target), findViewById(R.id.alex));
-        final Target jenny = new Target("Jenny Liu", new Location("jenny_location"), R.drawable.jenny_left,R.drawable.jenny_right,R.drawable.jenny_center ,findViewById(R.id.jenny_target), findViewById(R.id.jenny));
 
+        targets = new HashMap<String, Target>();
 
         firebaseAuth = FirebaseAuth.getInstance();
-        currentUser = firebaseAuth.getCurrentUser();
         database = FirebaseDatabase.getInstance().getReference();
 
         mSensorManager = (SensorManager)getSystemService(SENSOR_SERVICE);
@@ -128,24 +123,33 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         mCameraHandlerThread.start();
         mCameraHandler = new Handler(mCameraHandlerThread.getLooper());
 
+        final Target brandon = new Target("Brandon Lin", new Location("brandon_location"), R.drawable.brandon_left,R.drawable.brandon_right,R.drawable.brandon_center,findViewById(R.id.brandon_target), findViewById(R.id.brandon) );
+        final Target zhongxia = new Target("Zhongxia Yan", new Location("zhongxia_location"),R.drawable.zhongxia_left,R.drawable.zhongxia_right,R.drawable.zhongxia_center ,findViewById(R.id.zhongxia_target), findViewById(R.id.zhongxia));
+        final Target alex = new Target("Alex Chen", new Location("alex_location"), R.drawable.alex_left,R.drawable.alex_right,R.drawable.alex_center ,findViewById(R.id.alex_target), findViewById(R.id.alex));
+        final Target jenny = new Target("Jenny Liu", new Location("jenny_location"), R.drawable.jenny_left,R.drawable.jenny_right,R.drawable.jenny_center ,findViewById(R.id.jenny_target), findViewById(R.id.jenny));
+
+        targets.put("Brandon Lin", brandon);
+        targets.put("Alex Chen", alex);
+        targets.put("Brandon Lin", zhongxia);
+        targets.put("Jenny Liu", jenny);
+
         // Attach a listener to read the data at our posts reference
         database.child("users").addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 //append the child to the map
                 String name = (String) dataSnapshot.child("name").getValue();
-                if (name.equals("Jenny Liu") && !name.equals(user.name)) {
-                    targets.put(name, jenny);
+                Log.d("ZZZZZ", name + " " + user.name);
+                if (name.equals(user.name)) {
+                    return;
                 }
-                else if (name.equals("Alex Chen")  && !name.equals(user.name)){
-                    targets.put(name, alex);
-                }
-                else if (name.equals("Brandon Lin")  && !name.equals(user.name)){
-                    targets.put(name, brandon);
-                }
-                else if (!name.equals(user.name)){
-                    targets.put(name, zhongxia);
-                }
+                float lon = (float) (double) dataSnapshot.child("longitude").getValue();
+                float lat = (float) (double) dataSnapshot.child("latitude").getValue();
+                Target newPerson = targets.get("Brandon Lin");
+                Log.d("ZZZZZ", " " + newPerson);
+                newPerson.setLocation(lon, lat);
+                newPerson.plumbbob.setVisibility(View.VISIBLE);
+                newPerson.pointer.setVisibility(View.VISIBLE);
             }
 
             @Override
@@ -174,9 +178,6 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
 
                 }
                 targets.remove(name);
-
-
-
             }
 
             @Override
@@ -193,19 +194,8 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
         updateHandler = new Handler(Looper.getMainLooper());
         updateRunnable = new Runnable() {
             public void run() {
-                zhongxia.setLocation(-91.3019655, 42.1545758);
-                alex.setLocation(-71.0019655, 43.3545758);
-                brandon.setLocation(-71.1019655, 42.3545758);
-
-
-
-                targets = new HashMap<String, Target>();
-
-
                 for (Target t : targets.values()) {
                     Location source = new Location("source");
-                    source.setLatitude(42.356);
-                    source.setLongitude(-71.102);
 
                     float distance = source.distanceTo(t.getLocation());
                     float mybear = azimuth;
@@ -233,10 +223,10 @@ public class FullscreenActivity extends AppCompatActivity implements SensorEvent
                         target.setVisibility(View.GONE);
                     }
 
-                    final TextView distancetext = (TextView) findViewById(R.id.distance_id);
-                    String distance_string = String.valueOf((int) Math.round(distance)) + " m";
-
-                    distancetext.setText(distance_string);
+//                    final TextView distancetext = (TextView) findViewById(R.id.distance_id);
+//                    String distance_string = String.valueOf((int) Math.round(distance)) + " m";
+//
+//                    distancetext.setText(distance_string);
                     Log.d(t.name, String.valueOf(azimuth));
                     Log.d(t.name, String.valueOf(t.exp.getValue()));
 
